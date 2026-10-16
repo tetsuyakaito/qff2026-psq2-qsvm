@@ -103,6 +103,57 @@ class RoutingMetrics:
     sabre_swap_count:        int
     layout:                  List[int] = field(default_factory=list)
 
+    # ── Dict-like compatibility & prompt aliases ──────────────────────────────
+    @property
+    def circuit_depth(self) -> int:
+        return self.transpiled_depth
+
+    @property
+    def cx_count(self) -> int:
+        return self.transpiled_cx_count
+
+    def __getitem__(self, key: str):
+        if key == "circuit_depth":
+            return self.transpiled_depth
+        if key == "cx_count":
+            return self.transpiled_cx_count
+        if hasattr(self, key):
+            return getattr(self, key)
+        raise KeyError(key)
+
+    def get(self, key: str, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def __contains__(self, key: str) -> bool:
+        return hasattr(self, key) or key in ("circuit_depth", "cx_count")
+
+    def keys(self):
+        d = asdict(self)
+        d["circuit_depth"] = self.transpiled_depth
+        d["cx_count"] = self.transpiled_cx_count
+        return d.keys()
+
+    def values(self):
+        d = asdict(self)
+        d["circuit_depth"] = self.transpiled_depth
+        d["cx_count"] = self.transpiled_cx_count
+        return d.values()
+
+    def items(self):
+        d = asdict(self)
+        d["circuit_depth"] = self.transpiled_depth
+        d["cx_count"] = self.transpiled_cx_count
+        return d.items()
+
+    def to_dict(self) -> dict:
+        d = asdict(self)
+        d["circuit_depth"] = self.transpiled_depth
+        d["cx_count"] = self.transpiled_cx_count
+        return d
+
     # ------------------------------------------------------------------
     def summary(self) -> str:
         return (
