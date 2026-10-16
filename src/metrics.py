@@ -577,6 +577,31 @@ class ClassifierResult:
     n_circuits: int          # Total circuit executions = N*(N-1)//2 for train kernel
 
 
+class ClassifierResultsDict(dict):
+    """Dictionary holding aggregated evaluation results with prompt alias support."""
+    _ALIASES = {
+        "QSVM (Ideal)": "QSVM_Ideal",
+        "QSVM (Processor A - Noisy)": "QSVM_ProcA_Noisy",
+        "QSVM (Processor B - Noisy)": "QSVM_ProcB_Noisy",
+        "QSVM (Processor A - Mitigated)": "QSVM_ProcA_Mitigated",
+        "QSVM (Processor B - Mitigated)": "QSVM_ProcB_Mitigated",
+        "Classical SVM (RBF - GridSearchCV tuned C and gamma)": "Classical_SVM_RBF",
+        "Classical SVM (Polynomial - GridSearchCV tuned degree, C, gamma)": "Classical_SVM_Poly",
+    }
+
+    def __getitem__(self, key):
+        canonical = self._ALIASES.get(key, key)
+        return super().__getitem__(canonical)
+
+    def get(self, key, default=None):
+        canonical = self._ALIASES.get(key, key)
+        return super().get(canonical, default)
+
+    def __contains__(self, key):
+        canonical = self._ALIASES.get(key, key)
+        return super().__contains__(canonical)
+
+
 def _train_qsvm(
     K_train:  np.ndarray,
     y_train:  np.ndarray,
@@ -697,7 +722,7 @@ def _aggregate_results(
     for r in results:
         by_clf[r.clf_name].append(r)
 
-    agg: Dict[str, Dict[str, float]] = {}
+    agg: Dict[str, Dict[str, float]] = ClassifierResultsDict()
     for clf_name, rs in by_clf.items():
         metrics_vals: Dict[str, List[float]] = {
             "accuracy":   [r.accuracy   for r in rs],
@@ -888,19 +913,7 @@ def evaluate_classifiers(
                   f"acc={row['accuracy_mean']:.4f}±{row['accuracy_ci95']:.4f}  "
                   f"f1={row['f1_mean']:.4f}  "
                   f"auc={row['roc_auc_mean']:.4f}  "
-    # Add aliases matching the exact names in QFF 2026 track 4 prompt
-    name_map = {
-        "QSVM_Ideal": "QSVM (Ideal)",
-        "QSVM_ProcA_Noisy": "QSVM (Processor A - Noisy)",
-        "QSVM_ProcB_Noisy": "QSVM (Processor B - Noisy)",
-        "QSVM_ProcA_Mitigated": "QSVM (Processor A - Mitigated)",
-        "QSVM_ProcB_Mitigated": "QSVM (Processor B - Mitigated)",
-        "Classical_SVM_RBF": "Classical SVM (RBF - GridSearchCV tuned C and gamma)",
-        "Classical_SVM_Poly": "Classical SVM (Polynomial - GridSearchCV tuned degree, C, gamma)",
-    }
-    for k, v in list(aggregated.items()):
-        if k in name_map:
-            aggregated[name_map[k]] = v
+                  f"kta={row.get('kta_mean', float('nan')):.4f}")
 
     return aggregated
 
