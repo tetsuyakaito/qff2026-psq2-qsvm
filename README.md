@@ -5,7 +5,7 @@ Benchmark and architectural evaluation of 4-qubit Quantum Support Vector Machine
 
 ---
 
-## 📌 Repository Architecture
+##  Repository Architecture
 
 ```text
 ├── .gitignore
@@ -31,7 +31,7 @@ Benchmark and architectural evaluation of 4-qubit Quantum Support Vector Machine
 
 ---
 
-## ⚙️ Frozen Hardware & Noise Specifications (Phase 1)
+##  Frozen Hardware & Noise Specifications (Phase 1)
 
 - **Basis Gates**: `['rz', 'sx', 'x', 'cx']`
 - **Synthetic Noise Model**:
@@ -43,7 +43,7 @@ Benchmark and architectural evaluation of 4-qubit Quantum Support Vector Machine
 
 ---
 
-## 🚀 Quickstart
+##  Quickstart
 
 ### 1. Install dependencies
 ```bash
@@ -70,7 +70,7 @@ python3 -m src.visualization
 
 ---
 
-## 📊 Benchmarking & Statistical Evaluation
+##  Benchmarking & Statistical Evaluation
 The pipeline evaluates 7 models across 5 random seeds (`[42, 100, 2026, 7, 99]`):
 1. **QSVM (Ideal)**
 2. **QSVM (Processor A - Noisy)**
