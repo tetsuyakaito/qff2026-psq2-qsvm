@@ -5,7 +5,7 @@ Benchmark and architectural evaluation of 4-qubit Quantum Support Vector Machine
 
 ---
 
-## ⚡ Reproduce Everything in One Go
+##  Reproduce Everything in One Go
 
 To reproduce all results, benchmark tables, 300-DPI publication figures, and executed notebook cleanly from scratch:
 
@@ -28,7 +28,7 @@ python3 run_all.py
 
 ---
 
-## 📂 Repository Architecture
+##  Repository Architecture
 
 ```text
 ├── run_all.py             # Master 1-command reproduction script (end-to-end)
@@ -60,7 +60,7 @@ python3 run_all.py
 
 ---
 
-## 🔬 Official Documents & Hackathon Cell Clarification Inquiries
+##  Official Documents & Hackathon Cell Clarification Inquiries
 
 During our rigorous topological audit against IBM Quantum standards and QFF 2026 challenge texts, our team identified three critical discrepancies. We document them here for clarity and have formulated the corresponding clarification queries for the Hackathon Organizing Cell:
 
@@ -86,7 +86,7 @@ During our rigorous topological audit against IBM Quantum standards and QFF 2026
 
 ---
 
-## 💎 Processor D Ideology: Custom Co-Designed Topology
+##  Processor D Ideology: Custom Co-Designed Topology
 
 In our technical report ([`report.md`](file:///home/mrudula/qff2026-psq2-qsvm/report.md)), we detail the **Processor D Ideology**:
 - **Empirical Routing Bottlenecks**: Full entanglement on Processor A (branching tree) incurs **3 SWAP gates** (depth 61), while Processor B incurs **2 SWAP gates** (depth 44). Every SWAP decomposes into 3 physical CX gates, accelerating depolarizing noise accumulation and causing severe **kernel concentration**.
@@ -98,7 +98,7 @@ In our technical report ([`report.md`](file:///home/mrudula/qff2026-psq2-qsvm/re
 
 ---
 
-## 📊 Fixed Seeds & Reproducibility Guarantees
+##  Fixed Seeds & Reproducibility Guarantees
 
 Every benchmark in this repository is strictly deterministic:
 - **Transpilation Seed**: `seed_transpiler = 42`
@@ -120,6 +120,6 @@ Every benchmark in this repository is strictly deterministic:
 
 ---
 
-## 🤖 Mandatory AI Disclosure
+##  Mandatory AI Disclosure
 
 In accordance with Qiskit Fall Fest 2026 guidelines, we disclose that generative AI coding assistants (including Antigravity CLI and LLM pair programming agents) were utilized during this project for exploratory scaffolding, syntax linting, boilerplate generation, and verification script automation. All conceptual hardware architectures, topological co-design methodologies, benchmark interpretations, and final code validations were reviewed, structured, and verified by the submitting team.
