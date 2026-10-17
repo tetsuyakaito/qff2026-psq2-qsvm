@@ -80,12 +80,6 @@ During our rigorous topological audit against IBM Quantum standards and QFF 2026
 - **Repository Implementation**: We faithfully implemented the **exact 12-edge graph** as mandated by the problem prompt in `processors/processor_B.json`, identifying `[1, 2, 5, 6]` as the optimal 4-qubit routing subgraph (2 SWAPs vs. 3 on Processor A).
 - **Formal Hackathon Cell Inquiry**: *"Processor B is titled 'heavy-hex-inspired' but contains short 3-cycles and 4-cycles on [1,2,5,6] with chord (2,6). Should automated grading expect this exact 12-edge graph, or a bipartite subgraph with girth >= 6?"*
 
-### 3. Processor C: Showcase Presentation vs. Phase 1 Scope
-- **Observation**: Competition showcase slides refer to Processors A, B, and C, yet the Track 4 PS-Q2 problem specifications only provide coupling definitions for Processors A (5q) and B (9q).
-- **Formal Hackathon Cell Inquiry**: *"Is Processor C intended for Phase 1 PS-Q2 evaluation, or is it reserved for Phase 2 / other challenge tracks?"*
-
----
-
 ##  Processor D Ideology: Custom Co-Designed Topology
 
 In our technical report ([`report.md`](file:///home/mrudula/qff2026-psq2-qsvm/report.md)), we detail the **Processor D Ideology**:
