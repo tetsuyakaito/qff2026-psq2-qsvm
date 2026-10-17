@@ -59,9 +59,11 @@ if sys.platform.startswith("linux") and "libgomp" not in os.environ.get("LD_PREL
         str(pathlib.Path.home() / ".local/lib/python3.14/site-packages/qiskit_aer.libs/libgomp-e985bcbb.so.1.0.0"),
     ]:
         if pathlib.Path(lib_path).exists():
-            cur = os.environ.get("LD_PRELOAD", "")
-            os.environ["LD_PRELOAD"] = f"{lib_path}:{cur}" if cur else lib_path
-            break
+            env = os.environ.copy()
+            cur = env.get("LD_PRELOAD", "")
+            env["LD_PRELOAD"] = f"{lib_path}:{cur}" if cur else lib_path
+            os.execve(sys.executable, [sys.executable] + sys.argv, env)
+
 
 _FIGURES_DIR = _REPO_ROOT / "results" / "figures"
 _FIGURES_DIR.mkdir(parents=True, exist_ok=True)

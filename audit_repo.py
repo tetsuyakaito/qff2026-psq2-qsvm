@@ -14,14 +14,15 @@ import json
 import pathlib
 import pandas as pd
 
-# The 19 Mandatory Files for QFF 2026 Phase 1 PS-Q2
-MANDATORY_19_FILES = [
+# The Mandatory Submission Files for QFF 2026 Phase 1 PS-Q2
+MANDATORY_FILES = [
     "README.md",
     "main.ipynb",
     "requirements.txt",
     "report.md",
     "processors/processor_A.json",
     "processors/processor_B.json",
+    "processors/processor_D.json",
     "src/__init__.py",
     "src/processors.py",
     "src/problem.py",
@@ -54,27 +55,29 @@ def audit_repository() -> bool:
     all_passed = True
     repo_root = pathlib.Path(".")
 
-    # ── Check 1: Mandatory 19 Files ───────────────────────────────────────────
-    print("\n[CHECK 1/4] Verifying the 19 Mandatory Submission Files:")
+    # ── Check 1: Mandatory Submission Files ───────────────────────────────────
+    n_files = len(MANDATORY_FILES)
+    print(f"\n[CHECK 1/4] Verifying the {n_files} Mandatory Submission Files:")
     missing_or_empty = []
-    for idx, rel_path in enumerate(MANDATORY_19_FILES, 1):
+    for idx, rel_path in enumerate(MANDATORY_FILES, 1):
         p = repo_root / rel_path
         if not p.exists():
-            print(f"  ❌ [{idx:02d}/19] MISSING: {rel_path}")
+            print(f"  ❌ [{idx:02d}/{n_files}] MISSING: {rel_path}")
             missing_or_empty.append(rel_path)
             all_passed = False
         elif p.stat().st_size == 0:
-            print(f"  ❌ [{idx:02d}/19] EMPTY: {rel_path}")
+            print(f"  ❌ [{idx:02d}/{n_files}] EMPTY: {rel_path}")
             missing_or_empty.append(rel_path)
             all_passed = False
         else:
             size_kb = p.stat().st_size / 1024
-            print(f"  ✓  [{idx:02d}/19] {rel_path:<52} ({size_kb:8.1f} KB)")
+            print(f"  ✓  [{idx:02d}/{n_files}] {rel_path:<52} ({size_kb:8.1f} KB)")
 
     if missing_or_empty:
         print(f"\n❌ FAILED Check 1: {len(missing_or_empty)} files missing or empty.")
     else:
-        print("\n✓ PASSED Check 1: All 19 mandatory submission files exist and are non-empty.")
+        print(f"\n✓ PASSED Check 1: All {n_files} mandatory submission files exist and are non-empty.")
+
 
     # ── Check 2: Mandatory Rubric Keywords in Documentation ───────────────────
     print("\n[CHECK 2/4] Verifying Mandatory Rubric Keywords in Documentation:")

@@ -43,6 +43,8 @@ _PROCESSORS_DIR = _REPO_ROOT / "processors"
 
 PROCESSOR_A_JSON = _PROCESSORS_DIR / "processor_A.json"
 PROCESSOR_B_JSON = _PROCESSORS_DIR / "processor_B.json"
+PROCESSOR_D_JSON = _PROCESSORS_DIR / "processor_D.json"
+
 
 
 # ---------------------------------------------------------------------------
@@ -216,6 +218,12 @@ def load_processor_A() -> ProcessorConfig:
 def load_processor_B() -> ProcessorConfig:
     """Load the canonical Processor B (9-qubit heavy-hex) config."""
     return load_processor(PROCESSOR_B_JSON)
+
+
+def load_processor_D() -> ProcessorConfig:
+    """Load the custom Processor D (6-qubit diamond-coupled K_4 core) config."""
+    return load_processor(PROCESSOR_D_JSON)
+
 
 
 # ---------------------------------------------------------------------------
