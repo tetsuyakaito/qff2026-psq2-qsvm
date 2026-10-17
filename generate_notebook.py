@@ -14,16 +14,17 @@ import os
 import sys
 import pathlib
 
-# Preload libgomp on Linux if needed to prevent static TLS allocation issues
-if sys.platform.startswith("linux"):
+if sys.platform.startswith("linux") and "libgomp" not in os.environ.get("LD_PRELOAD", ""):
     for lib_path in [
         "/usr/lib/x86_64-linux-gnu/libgomp.so.1",
         str(pathlib.Path.home() / ".local/lib/python3.14/site-packages/qiskit_aer.libs/libgomp-e985bcbb.so.1.0.0"),
     ]:
-        if os.path.exists(lib_path) and "libgomp" not in os.environ.get("LD_PRELOAD", ""):
-            cur = os.environ.get("LD_PRELOAD", "")
-            os.environ["LD_PRELOAD"] = f"{lib_path}:{cur}" if cur else lib_path
-            break
+        if os.path.exists(lib_path):
+            env = os.environ.copy()
+            cur = env.get("LD_PRELOAD", "")
+            env["LD_PRELOAD"] = f"{lib_path}:{cur}" if cur else lib_path
+            os.execve(sys.executable, [sys.executable] + sys.argv, env)
+
 
 import nbformat
 from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell
