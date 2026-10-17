@@ -453,11 +453,11 @@ def plot_architecture_metrics(
 # ---------------------------------------------------------------------------
 
 def plot_kernel_heatmaps(
-    K_ideal:  np.ndarray,
-    K_procA:  np.ndarray,
-    K_procB:  np.ndarray,
-    y:        Optional[np.ndarray] = None,
+    K_ideal:   np.ndarray,
+    K_procA:   np.ndarray,
+    K_procB:   np.ndarray,
     save_path: str | pathlib.Path = _FIGURES_DIR / "fig3_kernel_matrices_and_concentration.png",
+    y:         Optional[np.ndarray] = None,
 ) -> pathlib.Path:
     """
     4-panel figure: 3 kernel heatmaps + off-diagonal concentration histogram.
@@ -478,13 +478,17 @@ def plot_kernel_heatmaps(
     K_ideal  : np.ndarray (n, n). Ideal Gram matrix.
     K_procA  : np.ndarray (n, n). Processor A noisy kernel.
     K_procB  : np.ndarray (n, n). Processor B noisy kernel.
-    y        : Optional binary label array for class-sorted display.
     save_path: Output path.
+    y        : Optional binary label array for class-sorted display.
 
     Returns
     -------
     pathlib.Path
     """
+    # Allow calling as (K_ideal, K_procA, K_procB, y, save_path)
+    if isinstance(save_path, np.ndarray) and y is None:
+        y, save_path = save_path, _FIGURES_DIR / "fig3_kernel_matrices_and_concentration.png"
+
     set_publication_style()
 
     # Optionally sort by class label
@@ -665,7 +669,16 @@ def plot_decision_boundaries(
             try:
                 Z = clf.predict(grid_full).reshape(xx.shape)
             except Exception:
-                Z = np.zeros_like(xx)
+                # If clf is a precomputed-kernel SVC
+                try:
+                    from src.metrics import compute_ideal_kernel
+                    from src.problem import build_feature_map
+                    fm = getattr(clf, "feature_map", None) or build_feature_map()
+                    X_tr = getattr(clf, "_X_train", X)
+                    K_grid = compute_ideal_kernel(grid_full, X_tr, fm)
+                    Z = clf.predict(K_grid).reshape(xx.shape)
+                except Exception:
+                    Z = np.zeros_like(xx)
 
         ax.contourf(xx, yy, Z, alpha=0.45, cmap=cmap_bg, levels=[-0.5, 0.5, 1.5])
         ax.contour( xx, yy, Z, levels=[0.5], colors=[colour], linewidths=1.8)
@@ -702,9 +715,12 @@ def plot_decision_boundaries(
 
 def plot_classification_performance(
     results_df,
-    datasets:  Optional[List[str]] = None,
     save_path: str | pathlib.Path  = _FIGURES_DIR / "fig5_accuracy_auc_comparison.png",
+    datasets:  Optional[List[str]] = None,
 ) -> pathlib.Path:
+    # Allow calling as (results_df, datasets, save_path)
+    if isinstance(save_path, (list, tuple)) and datasets is None:
+        datasets, save_path = save_path, _FIGURES_DIR / "fig5_accuracy_auc_comparison.png"
     """
     Grouped bar chart with 95% CI error bars for Accuracy, F1, and ROC-AUC.
 

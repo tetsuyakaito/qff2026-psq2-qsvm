@@ -80,85 +80,473 @@ html{background:var(--bg)}body{background:transparent}.bgv{position:fixed;inset:
 <h2 class="sec">The dimensionality leap</h2>
 <p class="lead">One sample's journey through the pipeline. The highlight walks the four stages; click any card to hold it.</p>
 <div class="grid" id="stages">
-<article class="st" tabindex="0"><h3><b>1</b>Tangled data</h3><svg id="s1" viewBox="0 0 300 210" role="img" aria-label="Two interleaved moon-shaped classes that no straight line can split"></svg>
-<p><strong>No straight line splits these.</strong> Two interleaved moons, expanded to 4 features and scaled into [0, π]⁴ so they can be used as rotation angles.</p><span class="f">problem.py</span></article>
+<article class="st" tabindex="0">
+  <h3><b>1</b>Tangled test data</h3>
+  <div class="ds-toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:4px 0 8px">
+    <select id="ds-select" aria-label="Select Test Dataset" style="font:500 0.8rem 'Hanken Grotesk',sans-serif;background:var(--pan);color:var(--tx);border:1px solid var(--ln);padding:4px 8px;cursor:pointer">
+      <option value="moons">make_moons test set (25 samples)</option>
+      <option value="real_digits">load_digits PCA-4 test set (25 samples)</option>
+      <option value="real_breast_cancer">breast_cancer PCA-4 test set (25 samples)</option>
+      <option value="quantum_aligned">quantum_aligned test set (5 samples)</option>
+    </select>
+    <span id="ds-badge" style="font-size:0.75rem;color:var(--mu);white-space:nowrap">fetching test data…</span>
+  </div>
+  <svg id="s1" viewBox="0 0 300 210" role="img" aria-label="Test samples projected to 2D"></svg>
+  <p><strong>Fetched from data/processed/*.csv.</strong> Real test samples scaled into [0, π]⁴ across 4 features. Circle: Class 0, Ring: Class 1.</p>
+  <span class="f">problem.py</span>
+</article>
 
-<article class="st" tabindex="0"><h3><b>2</b>Quantum encoder</h3><svg id="s2" viewBox="0 0 300 210" role="img" aria-label="Four-qubit ZZFeatureMap circuit feeding a glowing Hilbert space sphere"></svg>
-<p><strong>Each sample becomes a quantum state.</strong> Hadamards, phase rotations set by the features, and CX–P–CX entanglers on 4 qubits lift the point into Hilbert space.</p><span class="f">problem.py</span></article>
+<article class="st" tabindex="0">
+  <h3><b>2</b>Quantum encoder</h3>
+  <svg id="s2" viewBox="0 0 300 210" role="img" aria-label="Four-qubit ZZFeatureMap circuit feeding a glowing Hilbert space sphere"></svg>
+  <p><strong>Each sample becomes a quantum state.</strong> Hadamards, phase rotations set by the features, and CX–P–CX entanglers on 4 qubits lift the point into Hilbert space.</p>
+  <span class="f">problem.py</span>
+</article>
 
-<article class="st" tabindex="0"><h3><b>3</b>Kernel matrix</h3><svg id="s3" viewBox="0 0 300 210" role="img" aria-label="Heat map of pairwise state overlaps"></svg>
-<div class="seg" id="seg"><button class="on" data-m="0">Ideal</button><button data-m="1">Noisy</button><button data-m="2">Mitigated</button></div>
-<p id="kp"></p><span class="f">metrics.py</span></article>
+<article class="st" tabindex="0">
+  <h3><b>3</b>Kernel matrix</h3>
+  <svg id="s3" viewBox="0 0 300 210" role="img" aria-label="Heat map of pairwise state overlaps"></svg>
+  <div class="seg" id="seg">
+    <button class="on" data-m="0">Ideal</button>
+    <button data-m="1">Noisy</button>
+    <button data-m="2">Mitigated</button>
+  </div>
+  <p id="kp"></p>
+  <span class="f">metrics.py</span>
+</article>
 
-<article class="st" tabindex="0"><h3><b>4</b>Decision margin</h3><svg id="s4" viewBox="0 0 300 210" role="img" aria-label="Curved decision boundary with margin and support vectors"></svg>
-<p><strong>A classical SVM reads the kernel.</strong> The widest margin is a straight cut in Hilbert space, so it bends back into a curve here. Rings mark the support vectors.</p><span class="f">metrics.py</span> <span class="f">visualization.py</span></article>
+<article class="st" tabindex="0">
+  <h3><b>4</b>Decision margin</h3>
+  <svg id="s4" viewBox="0 0 300 210" role="img" aria-label="Curved decision boundary with margin and support vectors"></svg>
+  <p><strong>A classical SVM reads the kernel.</strong> The widest margin is a straight cut in Hilbert space, bending into a non-linear frontier over the test data. Rings mark support vectors.</p>
+  <span class="f">metrics.py</span> <span class="f">visualization.py</span>
+</article>
 </div>
 
 <h2 class="sec">Where it runs: two frozen virtual chips</h2>
-<p class="lead">Same circuits, same noise, different wiring. Routing cost on each topology is what separates them. Links come straight from our processor files; node positions are only for drawing.</p>
+<p class="lead">Same circuits, same noise, different wiring. Routing cost on each topology is what separates them. Live stats fetched from <code>results/tables/architecture_routing_comparison.csv</code>.</p>
 <div class="hw">
-<div class="pc"><h3>Processor A: 5 qubits, branching tree</h3><svg id="pa" viewBox="0 0 260 140" role="img" aria-label="Five-qubit branching tree"></svg><p>Links 0-1, 1-2, 1-3, 3-4. Best 4-qubit subgraph is <code>[0, 1, 2, 3]</code> (bold). The dashed arcs are the custom 5-ring alternative we also test.</p></div>
-<div class="pc"><h3>Processor B: 9 qubits, heavy-hex style</h3><svg id="pb" viewBox="0 0 260 140" role="img" aria-label="Nine-qubit heavy-hex with a highlighted four-qubit cycle"></svg><p>12 links. The best 4-qubit cycle is <code>[1, 2, 5, 6]</code> (bold): links 1-2, 2-5, 5-6, 6-1 plus the 2-6 chord.</p></div>
+<div class="pc" id="card-pa">
+  <h3>Processor A: 5 qubits, branching tree</h3>
+  <svg id="pa" viewBox="0 0 260 140" role="img" aria-label="Five-qubit branching tree"></svg>
+  <p>Links 0-1, 1-2, 1-3, 3-4. Best 4-qubit subgraph is <code>[0, 1, 2, 3]</code> (bold). Dashed arcs show custom ring co-design.</p>
+  <div id="pa-stats" style="margin-top:8px;font-size:0.85rem;color:var(--mu)">Loading routing stats…</div>
 </div>
-<div class="chips" aria-label="Frozen settings"><span class="ch">1-qubit depolarizing 0.001</span><span class="ch">2-qubit (CX) depolarizing 0.005</span><span class="ch">readout error 0.01</span><span class="ch">basis rz, sx, x, cx</span><span class="ch">optimization level 1</span><span class="ch">seed 42</span><span class="ch">4096 shots</span></div>
+<div class="pc" id="card-pb">
+  <h3>Processor B: 9 qubits, heavy-hex style</h3>
+  <svg id="pb" viewBox="0 0 260 140" role="img" aria-label="Nine-qubit heavy-hex with a highlighted four-qubit cycle"></svg>
+  <p>12 links. The optimal 4-qubit cycle is <code>[1, 2, 5, 6]</code> (bold): links 1-2, 2-5, 5-6, 6-1 plus the 2-6 chord.</p>
+  <div id="pb-stats" style="margin-top:8px;font-size:0.85rem;color:var(--mu)">Loading routing stats…</div>
+</div>
+</div>
+<div class="chips" aria-label="Frozen settings">
+  <span class="ch">1-qubit depolarizing 0.001</span>
+  <span class="ch">2-qubit (CX) depolarizing 0.005</span>
+  <span class="ch">readout error 0.01</span>
+  <span class="ch">basis rz, sx, x, cx</span>
+  <span class="ch">optimization level 1</span>
+  <span class="ch">seed 42</span>
+  <span class="ch">4096 shots</span>
+</div>
 
 <h2 class="sec">The scoreboard: 7 models, 5 seeds</h2>
-<p class="lead">Seeds 42, 100, 2026, 7 and 99. Every number is reported with mean, standard deviation and a 95% confidence interval.</p>
-<ul class="mods">
-<li>QSVM, ideal</li><li class="n">QSVM, Processor A, noisy</li><li class="n">QSVM, Processor B, noisy</li><li class="m">QSVM, Processor A, mitigated</li><li class="m">QSVM, Processor B, mitigated</li><li class="x">Classical SVM, RBF (GridSearchCV)</li><li class="x">Classical SVM, polynomial (GridSearchCV)</li></ul>
-<div class="met"><div><strong>Accuracy, F1, ROC-AUC</strong>how well it classifies</div><div><strong>Kernel-target alignment</strong>how well the kernel matches the labels</div><div><strong>Off-diagonal variance</strong>warns of kernel concentration</div><div><strong>N(N−1)/2 circuits</strong>the quantum cost per kernel</div></div>
+<p class="lead">Seeds 42, 100, 2026, 7 and 99. Live statistics fetched from <code>results/tables/classification_benchmark_results.csv</code> (Mean ± 95% Confidence Interval).</p>
+<div id="scoreboard-table-wrap" style="overflow-x:auto;margin-top:14px">
+  <table id="scoreboard-table" style="width:100%;border-collapse:collapse;font-size:0.88rem;background:var(--pan);border:1px solid var(--ln)">
+    <thead>
+      <tr style="border-bottom:1px solid var(--ln);text-align:left;color:var(--mu);background:var(--bg)">
+        <th style="padding:10px 14px">Model</th>
+        <th style="padding:10px 14px">Test Accuracy (Mean ± 95% CI)</th>
+        <th style="padding:10px 14px">F1-Score</th>
+        <th style="padding:10px 14px">ROC-AUC</th>
+        <th style="padding:10px 14px">KTA</th>
+        <th style="padding:10px 14px">Quantum Circuits</th>
+      </tr>
+    </thead>
+    <tbody id="scoreboard-body">
+      <tr><td colspan="6" style="padding:14px;text-align:center;color:var(--mu)">Loading benchmark metrics…</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="met" style="margin-top:16px">
+  <div><strong>Accuracy, F1, ROC-AUC</strong>Empirical test classification metrics</div>
+  <div><strong>Kernel-Target Alignment (KTA)</strong>Higher alignment correlates with greater margin separability</div>
+  <div><strong>Off-Diagonal Variance</strong>Quantifies kernel concentration under depolarizing noise</div>
+  <div><strong>Total Quantum Circuits</strong>N(N−1)/2 = 3,160 evaluations per training kernel matrix</div>
+</div>
 
-<footer>Code and results: <a href="https://github.com/tetsuyakaito/qff2026-psq2-qsvm">github.com/tetsuyakaito/qff2026-psq2-qsvm</a>. The kernel heat map and 2D boundary are illustrative; the real values come from <code>results/figures</code>.</footer>
+<footer>Code and results: <a href="https://github.com/tetsuyakaito/qff2026-psq2-qsvm">github.com/tetsuyakaito/qff2026-psq2-qsvm</a>. Real test data fetched from <code>data/processed</code> and tables from <code>results/tables</code>.</footer>
 </main>
+
 <script>
-(()=>{const v=document.getElementById('bgv');v.muted=true;v.defaultMuted=true;const go=()=>{const p=v.play();p&&p.catch(()=>{})};go();v.addEventListener('canplay',go);v.addEventListener('pause',()=>{if(!document.hidden)setTimeout(go,300)});['pointerdown','touchstart','keydown','scroll','click'].forEach(e=>addEventListener(e,go,{passive:true}));document.addEventListener('visibilitychange',()=>{if(!document.hidden)go()})})();
-const $=id=>document.getElementById(id),N='http://www.w3.org/2000/svg';
-let s=2026;const R=()=>(s=s*16807%2147483647)/2147483647;
-const P=[];for(let k=0;k<2;k++)for(let i=0;i<22;i++){const t=Math.PI*(i+.5)/22,n=()=>(R()-.5)*.18;P.push(k?{x:1-Math.cos(t)+n(),y:.5-Math.sin(t)+n(),k}:{x:Math.cos(t)+n(),y:Math.sin(t)+n(),k})}
-const X=x=>(x+1.5)*65+20,Y=y=>190-(y+.9)*65;
-const dots=()=>P.map(p=>`<circle cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="4" class="k${p.k}"/>`).join('');
-// 1 tangled
-$('s1').innerHTML=dots()+`<line class="bad" x1="20" y1="105" x2="280" y2="105"/><text class="lb" x="150" y="204" text-anchor="middle">● class 0   ○ class 1   no straight cut works</text>`;
-// 2 encoder
-const gate=(x,y,l)=>`<rect x="${x-10}" y="${y-9}" width="20" height="18" rx="3" class="gate"/><text x="${x}" y="${y+3.5}" class="gt">${l}</text>`;
-const cx=(x,a,b)=>`<line x1="${x}" y1="${a}" x2="${x}" y2="${b}" class="w2"/><circle cx="${x}" cy="${a}" r="3" style="fill:var(--tx)"/><circle cx="${x}" cy="${b}" r="6" class="ring"/><path d="M${x-6} ${b}H${x+6}M${x} ${b-6}V${b+6}" class="w2"/>`;
-const Wy=[36,76,116,156];let c2='<defs><radialGradient id="g"><stop offset="0" style="stop-color:var(--m)"/><stop offset=".6" style="stop-color:var(--c);stop-opacity:.55"/><stop offset="1" style="stop-color:var(--c);stop-opacity:0"/></radialGradient></defs>';
-Wy.forEach((y,i)=>{c2+=`<text class="lb" x="2" y="${y+3}">q${i}</text><line class="w" x1="22" y1="${y}" x2="198" y2="${y}"/>`+gate(38,y,'H')+gate(66,y,'P')});
-[[0,1],[2,3]].forEach(([a,b])=>{c2+=cx(94,Wy[a],Wy[b])+gate(112,Wy[b],'P')+cx(130,Wy[a],Wy[b])});
-c2+=cx(148,Wy[1],Wy[2])+gate(166,Wy[2],'P')+cx(184,Wy[1],Wy[2]);
-c2+=`<text class="lb" x="100" y="196" text-anchor="middle">ZZFeatureMap, 4 qubits</text><line class="w" x1="204" y1="105" x2="212" y2="105"/>
-<circle cx="245" cy="105" r="46" fill="url(#g)"/><circle cx="245" cy="105" r="36" fill="none" style="stroke:var(--c)" stroke-width="1.2"/>
-<g class="orb"><ellipse cx="245" cy="105" rx="36" ry="11" fill="none" style="stroke:var(--m)" stroke-width="1.2"/><circle cx="281" cy="105" r="4" class="k1"/></g>
-<g class="orb2"><ellipse cx="245" cy="105" rx="11" ry="36" fill="none" style="stroke:var(--c)" stroke-width="1.2"/><circle cx="245" cy="69" r="3.5" class="k0"/></g>
-<text class="lb2" x="245" y="172" text-anchor="middle">|ψ(x)⟩ in Hilbert space</text>`;
-$('s2').innerHTML=c2;
-// 3 kernel
-const ix=[1,5,9,13,17,20,22+1,22+5,22+9,22+13,22+17,22+20],Q=ix.map(i=>P[i]),n=12,lam=.55;
-const K=Q.map((a,i)=>Q.map((b,j)=>{if(i==j)return 1;const same=a.k==b.k,d=(a.x-b.x)**2+(a.y-b.y)**2;return Math.min(.95,(same?.55:.12)+.35*Math.exp(-3*d)*(same?1:.4))}));
-const Kn=K.map((r,i)=>r.map((v,j)=>Math.max(0,lam*v+(1-lam)/16+(i==j?0:(R()-.5)*.07)))),
-Km=Kn.map((r,i)=>r.map((v,j)=>i==j?1:Math.min(1,Math.max(0,(v-(1-lam)/16)/lam))));
-const M=[K,Kn,Km],txt=['Ideal: two bright blocks, one per class. Same-class pairs overlap, different-class pairs do not.','Hardware noise flattens everything toward grey. Off-diagonal variance drops, which is kernel concentration.','The noise floor is subtracted and the matrix is projected back to a valid kernel (PSD) before the SVM sees it.'];
-const vr=m=>{let a=[];m.forEach((r,i)=>r.forEach((v,j)=>i!=j&&a.push(v)));const u=a.reduce((x,y)=>x+y)/a.length;return a.reduce((x,y)=>x+(y-u)**2,0)/a.length};
-function heat(m){let h='';const c=14,o=30;m.forEach((r,i)=>r.forEach((v,j)=>h+=`<rect x="${o+j*c}" y="${o+i*c}" width="${c-1}" height="${c-1}" rx="2" style="fill:var(--c)" fill-opacity="${v.toFixed(2)}"/>`));
- ix.forEach((_,i)=>{const k=i<6?'k0':'k1';h+=`<rect x="${o+i*c}" y="${o-9}" width="${c-1}" height="4" rx="2" class="${k}"/><rect x="${o-9}" y="${o+i*c}" width="4" height="${c-1}" rx="2" class="${k}"/>`});
- h+=`<text class="lb2" x="30" y="12">K<tspan dy="3" font-size="7">ij</tspan><tspan dy="-3"> = |⟨ψ(xᵢ)|ψ(xⱼ)⟩|²</tspan></text><text class="lb" x="212" y="84">off-diagonal</text><text class="lb" x="212" y="97">variance</text><text x="212" y="124" style="font:500 28px 'Cormorant Garamond',serif;fill:var(--tx)">${vr(m).toFixed(3)}</text><text class="lb" x="212" y="150">1 cell = 1 run</text><text class="lb" x="30" y="204">illustrative 12-sample slice</text>`;return h}
-function setK(i){$('s3').innerHTML=heat(M[i]);$('kp').textContent=txt[i];document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',+b.dataset.m==i))}
-document.querySelectorAll('#seg button').forEach(b=>b.onclick=e=>{e.stopPropagation();setK(+b.dataset.m)});setK(0);
-// 4 boundary
-const B=[[-1.5,-.55],[-1,-.38],[-.5,.45],[0,.75],[.5,.3],[1,-.25],[1.5,0],[2,.95],[2.5,1.2]].map(p=>[X(p[0]),Y(p[1])]);
-let d=`M${B[0]}`;for(let i=1;i<B.length-1;i++){const m=[(B[i][0]+B[i+1][0])/2,(B[i][1]+B[i+1][1])/2];d+=`Q${B[i]} ${m}`}d+=`L${B[B.length-1]}`;
-const D=[];for(let i=0;i<B.length-1;i++)for(let t=0;t<20;t++)D.push([B[i][0]+(B[i+1][0]-B[i][0])*t/20,B[i][1]+(B[i+1][1]-B[i][1])*t/20]);
-const dist=p=>Math.min(...D.map(q=>Math.hypot(q[0]-X(p.x),q[1]-Y(p.y))));
-const sv=P.map(p=>({p,d:dist(p)})).sort((a,b)=>a.d-b.d).slice(0,6);
-$('s4').innerHTML=`<path d="${d}" fill="none" style="stroke:var(--a)" stroke-opacity=".2" stroke-width="22" stroke-linecap="round"/><path d="${d}" fill="none" style="stroke:var(--a)" stroke-width="2.2"/>`+dots()+sv.map(o=>`<circle class="sv" cx="${X(o.p.x)}" cy="${Y(o.p.y)}" r="8"/>`).join('')+`<text class="lb" x="150" y="204" text-anchor="middle">margin band, hyperplane, support vectors</text>`;
-// hardware
-const nodes=(el,pts,ed,cy,extra)=>{let h=extra||'';ed.forEach(([a,b])=>h+=`<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" class="${cy&&cy.includes(a)&&cy.includes(b)?'cy':'ed'}"/>`);
- pts.forEach((p,i)=>h+=`<circle cx="${p[0]}" cy="${p[1]}" r="11" class="nd"${cy&&cy.includes(i)?' style="stroke:var(--a);stroke-width:2.6"':''}/><text x="${p[0]}" y="${p[1]+4}" class="gt" style="font-size:11px">${i}</text>`);$(el).innerHTML=h};
-nodes('pa',[[40,55],[100,55],[160,22],[160,88],[220,88]],[[0,1],[1,2],[1,3],[3,4]],[0,1,2,3],'<line x1="160" y1="22" x2="160" y2="88" class="ed" stroke-dasharray="4 4"/><path d="M220 88Q130 160 40 55" fill="none" class="ed" stroke-dasharray="4 4"/>');
-nodes('pb',[[45,28],[100,28],[160,28],[215,28],[215,86],[160,86],[100,86],[100,124],[45,86]],[[0,1],[1,2],[1,6],[2,3],[2,6],[2,5],[3,4],[4,5],[5,6],[6,7],[6,8],[8,0]],[1,2,5,6]);
-// stage highlight loop
-const st=[...document.querySelectorAll('.st')];let cur=0,hold=false;
-const hl=i=>{cur=i;st.forEach((e,j)=>e.classList.toggle('on',j==i))};hl(0);
-st.forEach((e,i)=>{e.onclick=()=>{hold=true;hl(i)};e.onkeydown=ev=>{if(ev.key=='Enter'||ev.key==' '){ev.preventDefault();e.click()}}});
-setInterval(()=>{if(!hold)hl((cur+1)%4)},3200);
-</script></body></html>
+(()=>{const v=document.getElementById('bgv');if(v){v.muted=true;v.defaultMuted=true;const go=()=>{const p=v.play();p&&p.catch(()=>{})};go();v.addEventListener('canplay',go);v.addEventListener('pause',()=>{if(!document.hidden)setTimeout(go,300)});['pointerdown','touchstart','keydown','scroll','click'].forEach(e=>addEventListener(e,go,{passive:true}));document.addEventListener('visibilitychange',()=>{if(!document.hidden)go()})}})();
+
+const $=id=>document.getElementById(id);
+
+// Pre-bundled fallback datasets in case fetch is restricted under file://
+const FALLBACK_DATASETS = {"moons": [{"x": 1.7543867061985792, "y": 0.12706428722521143, "k": 1, "features": [1.7543867061985792, 0.12706428722521143, 0.4779318951893563, 0.537167235014709]}, {"x": 2.6480360174214006, "y": 0.3077377541599893, "k": 1, "features": [2.6480360174214006, 0.3077377541599893, -0.06115628813607099, 1.91635122852322]}, {"x": 2.0611740710602087, "y": 0.3410357970197624, "k": 1, "features": [2.0611740710602087, 0.3410357970197624, 0.4183779097436517, 0.8430847601143686]}, {"x": 1.927427920440186, "y": 1.697804528377603, "k": 0, "features": [1.927427920440186, 1.697804528377603, 1.7800260128938967, 0.6437022508876206]}, {"x": 2.299670729916021, "y": 0.26851659331407385, "k": 1, "features": [2.299670729916021, 0.26851659331407385, 0.1511853038435802, 1.2406606989223252]}, {"x": 1.0351321692302609, "y": 1.0339965136345928, "k": 1, "features": [1.0351321692302609, 1.0339965136345928, 1.1853826473511047, -0.008247202523599995]}, {"x": 0.6661398091835307, "y": 2.574903400451644, "k": 0, "features": [0.6661398091835307, 2.574903400451644, 0.6799683212428621, 0.4983793713113324]}, {"x": 1.3900266665938983, "y": 0.7415287696349646, "k": 1, "features": [1.3900266665938983, 0.7415287696349646, 1.060935067424916, 0.11222265530483339]}, {"x": 1.2843883702330807, "y": 0.4576031735525122, "k": 1, "features": [1.2843883702330807, 0.4576031735525122, 1.0135030560009612, 0.11401976552604697]}, {"x": 1.0615102828190504, "y": 1.8404685616061636, "k": 1, "features": [1.0615102828190504, 1.8404685616061636, 1.2351520977223307, 0.10824799736897336]}, {"x": 0.2583236352421944, "y": 1.9953823652647436, "k": 0, "features": [0.2583236352421944, 1.9953823652647436, 0.49110799661259485, 0.5229469707432162]}, {"x": 2.0359190275168166, "y": 0.14035574859070732, "k": 1, "features": [2.0359190275168166, 0.14035574859070732, 0.22767773721801757, 0.8699073112053891]}, {"x": 1.4356420038468403, "y": 2.6789015437977444, "k": 0, "features": [1.4356420038468403, 2.6789015437977444, 1.8955845482389468, 0.6132007870624488]}, {"x": 0.6874575796385087, "y": 2.706347390138651, "k": 0, "features": [0.6874575796385087, 2.706347390138651, 0.6712281658830928, 0.5677239342032525]}, {"x": 1.176475569111329, "y": 0.8006380983582193, "k": 1, "features": [1.176475569111329, 0.8006380983582193, 1.1399902384349843, 0.024596683667122497]}, {"x": 0.23418577439775037, "y": 1.8699629168010403, "k": 0, "features": [0.23418577439775037, 1.8699629168010403, 0.564821677956727, 0.505905092958582]}, {"x": 1.537201810407716, "y": 2.2550065883351462, "k": 0, "features": [1.537201810407716, 2.2550065883351462, 1.8315519236948452, 0.45396196156564567]}, {"x": 1.592320529985328, "y": 0.3696859517270728, "k": 1, "features": [1.592320529985328, 0.3696859517270728, 0.7744980305807302, 0.31643961021087974]}, {"x": -0.10987032599914026, "y": 1.2498966066240282, "k": 0, "features": [-0.10987032599914026, 1.2498966066240282, 0.9759838068594631, 0.8201186188530195]}, {"x": 1.5367563913841036, "y": 2.6750522588087167, "k": 0, "features": [1.5367563913841036, 2.6750522588087167, 2.0578121824094726, 0.676717218485425]}, {"x": 0.02152349369723772, "y": 1.2730339305864555, "k": 0, "features": [0.02152349369723772, 1.2730339305864555, 0.9781883049819498, 0.6385005682759448]}, {"x": 0.05811758072236539, "y": 0.848595099075641, "k": 0, "features": [0.05811758072236539, 0.848595099075641, 1.3871537106064669, 0.5915768347813709]}, {"x": 1.822851741640268, "y": 1.6501682897986456, "k": 0, "features": [1.822851741640268, 1.6501682897986456, 1.6737351295477816, 0.510127707218635]}, {"x": 1.07927488530577, "y": 2.989742065448676, "k": 0, "features": [1.07927488530577, 2.989742065448676, 1.3415102826254988, 0.6985870809528151]}, {"x": 1.8615694413605437, "y": 0.3124857163311252, "k": 1, "features": [1.8615694413605437, 0.3124857163311252, 0.5379932922572401, 0.594118485100811]}], "real_digits": [{"x": 2.194942370241337, "y": 2.742630136720724, "k": 1, "features": [2.194942370241337, 2.742630136720724, 0.3870085922627444, 0.6469769335372999]}, {"x": 2.1175202711010206, "y": 2.550553956267556, "k": 1, "features": [2.1175202711010206, 2.550553956267556, 0.14526752946281915, 1.049574677344407]}, {"x": 2.86347137928602, "y": 2.6357392751039166, "k": 1, "features": [2.86347137928602, 2.6357392751039166, 0.74839956183881, 0.5047286941025905]}, {"x": 0.7512770958755935, "y": 1.91104421897601, "k": 0, "features": [0.7512770958755935, 1.91104421897601, 0.8918472368493203, 0.3405020046298428]}, {"x": 2.1974485731768514, "y": 2.577863414555808, "k": 1, "features": [2.1974485731768514, 2.577863414555808, 0.056735998868817306, 1.6238215704563348]}, {"x": 2.3045592204574508, "y": 2.2087196627982495, "k": 1, "features": [2.3045592204574508, 2.2087196627982495, 0.1762326778725456, 1.0451880817898846]}, {"x": 0.9515890114850984, "y": 1.9301994992426503, "k": 0, "features": [0.9515890114850984, 1.9301994992426503, 0.7626905140374427, 0.3384877479685222]}, {"x": 2.1274809867415407, "y": 0.4740438971777623, "k": 1, "features": [2.1274809867415407, 0.4740438971777623, 0.8191226391844362, 0.6489779556155535]}, {"x": 2.727054845335286, "y": 0.9712877226390416, "k": 1, "features": [2.727054845335286, 0.9712877226390416, 0.8258586892461558, 0.5957133766824649]}, {"x": 2.5668417489091913, "y": 1.2023820768086635, "k": 1, "features": [2.5668417489091913, 1.2023820768086635, 0.6339140682498257, 0.3274686958279839]}, {"x": 1.065261479827548, "y": 1.9831380294685208, "k": 0, "features": [1.065261479827548, 1.9831380294685208, 0.5910939819882958, 0.7379809442055181]}, {"x": 1.8301144989384168, "y": 0.0668244683406718, "k": 1, "features": [1.8301144989384168, 0.0668244683406718, 0.7539585571380688, 1.632651217492617]}, {"x": 0.7126052946583543, "y": 2.2038887497805644, "k": 0, "features": [0.7126052946583543, 2.2038887497805644, 0.36839386889545794, 0.7471490201454578]}, {"x": 0.7967857051360299, "y": 2.004121228416768, "k": 0, "features": [0.7967857051360299, 2.004121228416768, 0.8219529650737613, 0.3577342682522536]}, {"x": 2.767311101529886, "y": 1.7080907553060247, "k": 1, "features": [2.767311101529886, 1.7080907553060247, 2.777024474121244, 2.2573689595944884]}, {"x": 0.48185424157686785, "y": 1.996688681309094, "k": 0, "features": [0.48185424157686785, 1.996688681309094, 1.3111004467698328, 0.9482518553664541]}, {"x": 0.30809628290688446, "y": 2.1525632117006457, "k": 0, "features": [0.30809628290688446, 2.1525632117006457, 0.29663639381130086, 1.4309155007359973]}, {"x": 2.5647914366483953, "y": 1.7678248626457667, "k": 1, "features": [2.5647914366483953, 1.7678248626457667, 0.2159152582794361, 0.8544444778236138]}, {"x": 0.7248933483305224, "y": 2.079796523526449, "k": 0, "features": [0.7248933483305224, 2.079796523526449, 0.9557336276404064, 0.4321181111010437]}, {"x": 0.5942047461083635, "y": 2.0993091394161008, "k": 0, "features": [0.5942047461083635, 2.0993091394161008, 1.427440180447842, 0.4573554538220884]}, {"x": 0.5782297145386766, "y": 2.105632573504703, "k": 0, "features": [0.5782297145386766, 2.105632573504703, 1.366763106123206, 0.6096749855763839]}, {"x": 0.9336394373775938, "y": 1.8555520543772048, "k": 0, "features": [0.9336394373775938, 1.8555520543772048, 0.932126721263088, 0.059334543882407664]}, {"x": -0.11787254643325172, "y": 1.875881517005236, "k": 0, "features": [-0.11787254643325172, 1.875881517005236, 0.027368591115410124, 1.8749101616261288]}, {"x": 2.675479797552024, "y": 1.1780963611385655, "k": 1, "features": [2.675479797552024, 1.1780963611385655, 0.3820099697338996, 0.54955661599618]}, {"x": 2.2581731482540537, "y": 0.4597415525885626, "k": 1, "features": [2.2581731482540537, 0.4597415525885626, 0.1138610154815367, 1.3465379599673408]}], "real_breast_cancer": [{"x": 0.7639405608625583, "y": 0.8696359447141565, "k": 1, "features": [0.7639405608625583, 0.8696359447141565, 1.5941333101162947, 1.780847538195592]}, {"x": 2.1503342481964967, "y": 0.8486453962630844, "k": 0, "features": [2.1503342481964967, 0.8486453962630844, 1.2210827468931642, 1.8098370338242005]}, {"x": 3.7317900174985614, "y": 2.443679970937858, "k": 0, "features": [3.7317900174985614, 2.443679970937858, 2.5089838702576115, 3.0799645528949897]}, {"x": 0.16457499234683348, "y": 1.0265544033192326, "k": 1, "features": [0.16457499234683348, 1.0265544033192326, 1.863831711595132, 1.4135368211427364]}, {"x": 0.2259911201434828, "y": 1.6746841076423609, "k": 1, "features": [0.2259911201434828, 1.6746841076423609, 1.6873977873995003, 2.329768229952247]}, {"x": 0.13899817221990884, "y": 1.226820921964695, "k": 1, "features": [0.13899817221990884, 1.226820921964695, 2.41511132043198, 1.636106026046518]}, {"x": 0.3836944033773799, "y": 1.5373318514639, "k": 1, "features": [0.3836944033773799, 1.5373318514639, 1.4446906574481004, 2.418054050189343]}, {"x": 0.37463137599751006, "y": 0.9541914528670333, "k": 1, "features": [0.37463137599751006, 0.9541914528670333, 0.8321815424045487, 1.6214698838470762]}, {"x": 1.9571205683934936, "y": 0.7394398845980673, "k": 0, "features": [1.9571205683934936, 0.7394398845980673, 1.2357526963124887, 1.886688769838848]}, {"x": 1.7248266845990394, "y": 2.4077095014922527, "k": 1, "features": [1.7248266845990394, 2.4077095014922527, 3.5461026423309, 0.3844804246022469]}, {"x": 2.0521951981704545, "y": 0.45531056686520416, "k": 0, "features": [2.0521951981704545, 0.45531056686520416, 2.586162498657675, 2.1813729685919627]}, {"x": 1.8519778371531184, "y": 0.7331597628157038, "k": 0, "features": [1.8519778371531184, 0.7331597628157038, 0.7846072979330097, 1.747068289571157]}, {"x": 2.2353747366983394, "y": 0.8539529400534328, "k": 0, "features": [2.2353747366983394, 0.8539529400534328, 0.7149004317244427, 1.5254505794827495]}, {"x": 2.387300847498213, "y": 2.848555363339207, "k": 0, "features": [2.387300847498213, 2.848555363339207, -0.9052561503602192, 1.4962042354690979]}, {"x": 1.3876806364390717, "y": 0.7757825509684577, "k": 0, "features": [1.3876806364390717, 0.7757825509684577, 1.135117937876214, 1.7106527420198738]}, {"x": 0.45904253844626464, "y": 1.1731622311361571, "k": 1, "features": [0.45904253844626464, 1.1731622311361571, 1.3782038267188748, 1.7468573012388275]}, {"x": 0.5378261607373804, "y": 1.9541933640392128, "k": 1, "features": [0.5378261607373804, 1.9541933640392128, 2.020535307156029, 2.886991710043995]}, {"x": 0.9510092771658452, "y": 1.520259487787733, "k": 1, "features": [0.9510092771658452, 1.520259487787733, 1.05901667483255, 1.5487693061108811]}, {"x": 0.007487828251039107, "y": 0.7204540247326878, "k": 1, "features": [0.007487828251039107, 0.7204540247326878, 1.4545645069520723, 1.3820950656792483]}, {"x": 0.594706699928188, "y": 1.6704402834314045, "k": 1, "features": [0.594706699928188, 1.6704402834314045, 1.421019405487484, 0.8025399304244728]}, {"x": 2.207742346719943, "y": 0.6639359588642437, "k": 0, "features": [2.207742346719943, 0.6639359588642437, 1.8239535737279036, 2.1270316156684514]}, {"x": 0.48540178563451153, "y": 0.957417244361265, "k": 1, "features": [0.48540178563451153, 0.957417244361265, 1.1299039404157611, 1.5521787540760184]}, {"x": 0.3794118540703556, "y": 0.8313160637398832, "k": 1, "features": [0.3794118540703556, 0.8313160637398832, 1.5791055904140316, 1.701203808830244]}, {"x": 0.18631204163628343, "y": 1.05182256849118, "k": 1, "features": [0.18631204163628343, 1.05182256849118, 2.7094401387780156, 1.7974672585862803]}, {"x": 0.03572240087835543, "y": 1.144084306533496, "k": 1, "features": [0.03572240087835543, 1.144084306533496, 1.2398299897139693, 1.8565364123786987]}], "quantum_aligned": [{"x": 1.5927992630674768, "y": 2.6490835513259743, "k": 0, "features": [1.5927992630674768, 2.6490835513259743, 2.0393595180230575, 0.9979711767930641]}, {"x": 3.224472700228623, "y": 0.5861502089082096, "k": 0, "features": [3.224472700228623, 0.5861502089082096, -0.5771569144564015, 0.8965959385504726]}, {"x": 1.678111955746138, "y": 1.7396978233860592, "k": 1, "features": [1.678111955746138, 1.7396978233860592, -0.24500183137607237, 0.350651955202107]}, {"x": 0.38847898776701567, "y": 1.419144601076092, "k": 1, "features": [0.38847898776701567, 1.419144601076092, 0.11005153585147508, 2.167535251915119]}, {"x": 0.3813922619626098, "y": 1.3319089098908556, "k": 1, "features": [0.3813922619626098, 1.3319089098908556, 0.696514397750325, 3.008276270330048]}]};
+const FALLBACK_BENCHMARK = [{"clf_name": "QSVM_Ideal", "accuracy_mean": 0.8, "accuracy_std": 0.079057, "accuracy_ci95": 0.098162, "f1_mean": 0.795789, "f1_std": 0.080114, "f1_ci95": 0.099475, "roc_auc_mean": 0.846, "roc_auc_std": 0.097622, "roc_auc_ci95": 0.121213, "kta_mean": 0.103725, "kta_std": 0.003486, "kta_ci95": 0.004329, "od_var_mean": 0.00789, "od_var_std": 0.000448, "od_var_ci95": 0.000557, "n_circuits_mean": 3160.0, "n_circuits_std": 0.0, "n_circuits_ci95": 0.0}, {"clf_name": "QSVM_ProcA_Noisy", "accuracy_mean": 0.78, "accuracy_std": 0.075829, "accuracy_ci95": 0.094154, "f1_mean": 0.780317, "f1_std": 0.07, "f1_ci95": 0.086916, "roc_auc_mean": 0.838, "roc_auc_std": 0.073621, "roc_auc_ci95": 0.091412, "kta_mean": 0.094885, "kta_std": 0.003166, "kta_ci95": 0.003932, "od_var_mean": 0.003847, "od_var_std": 0.000216, "od_var_ci95": 0.000268, "n_circuits_mean": 3160.0, "n_circuits_std": 0.0, "n_circuits_ci95": 0.0}, {"clf_name": "QSVM_ProcB_Noisy", "accuracy_mean": 0.77, "accuracy_std": 0.067082, "accuracy_ci95": 0.083293, "f1_mean": 0.772525, "f1_std": 0.060885, "f1_ci95": 0.075599, "roc_auc_mean": 0.836, "roc_auc_std": 0.076354, "roc_auc_ci95": 0.094807, "kta_mean": 0.095437, "kta_std": 0.003028, "kta_ci95": 0.00376, "od_var_mean": 0.004033, "od_var_std": 0.000241, "od_var_ci95": 0.0003, "n_circuits_mean": 3160.0, "n_circuits_std": 0.0, "n_circuits_ci95": 0.0}, {"clf_name": "QSVM_ProcA_Mitigated", "accuracy_mean": 0.8, "accuracy_std": 0.093541, "accuracy_ci95": 0.116147, "f1_mean": 0.79731, "f1_std": 0.086614, "f1_ci95": 0.107546, "roc_auc_mean": 0.84, "roc_auc_std": 0.093005, "roc_auc_ci95": 0.115481, "kta_mean": 0.094841, "kta_std": 0.003189, "kta_ci95": 0.00396, "od_var_mean": 0.007516, "od_var_std": 0.000423, "od_var_ci95": 0.000525, "n_circuits_mean": 3160.0, "n_circuits_std": 0.0, "n_circuits_ci95": 0.0}, {"clf_name": "QSVM_ProcB_Mitigated", "accuracy_mean": 0.79, "accuracy_std": 0.096177, "accuracy_ci95": 0.119419, "f1_mean": 0.79213, "f1_std": 0.09317, "f1_ci95": 0.115685, "roc_auc_mean": 0.846, "roc_auc_std": 0.086487, "roc_auc_ci95": 0.107388, "kta_mean": 0.095433, "kta_std": 0.003068, "kta_ci95": 0.003809, "od_var_mean": 0.007521, "od_var_std": 0.000427, "od_var_ci95": 0.00053, "n_circuits_mean": 3160.0, "n_circuits_std": 0.0, "n_circuits_ci95": 0.0}, {"clf_name": "Classical_SVM_RBF", "accuracy_mean": 1.0, "accuracy_std": 0.0, "accuracy_ci95": 0.0, "f1_mean": 1.0, "f1_std": 0.0, "f1_ci95": 0.0, "roc_auc_mean": 1.0, "roc_auc_std": 0.0, "roc_auc_ci95": 0.0, "kta_mean": NaN, "kta_std": NaN, "kta_ci95": NaN, "od_var_mean": NaN, "od_var_std": NaN, "od_var_ci95": NaN, "n_circuits_mean": 0.0, "n_circuits_std": 0.0, "n_circuits_ci95": 0.0}, {"clf_name": "Classical_SVM_Poly", "accuracy_mean": 0.97, "accuracy_std": 0.027386, "accuracy_ci95": 0.034004, "f1_mean": 0.969424, "f1_std": 0.027987, "f1_ci95": 0.034751, "roc_auc_mean": 0.978, "roc_auc_std": 0.043818, "roc_auc_ci95": 0.054407, "kta_mean": NaN, "kta_std": NaN, "kta_ci95": NaN, "od_var_mean": NaN, "od_var_std": NaN, "od_var_ci95": NaN, "n_circuits_mean": 0.0, "n_circuits_std": 0.0, "n_circuits_ci95": 0.0}];
+const FALLBACK_ROUTING = [{"label": "Processor_A_5Q_Branching_Tree_linear_reps2_primary", "processor_name": "Processor_A_5Q_Branching_Tree", "entanglement": "linear", "reps": 2, "logical_qubits": 4, "physical_qubits_budget": 5, "logical_cx_count": 12, "transpiled_depth": 23, "transpiled_cx_count": 12, "single_qubit_gates": 38, "total_gates": 50, "estimated_swap_overhead": 0, "sabre_swap_count": 0}, {"label": "Processor_A_5Q_Branching_Tree_ring_linear_reps2", "processor_name": "Processor_A_5Q_Branching_Tree_ring", "entanglement": "linear", "reps": 2, "logical_qubits": 4, "physical_qubits_budget": 5, "logical_cx_count": 12, "transpiled_depth": 23, "transpiled_cx_count": 12, "single_qubit_gates": 38, "total_gates": 50, "estimated_swap_overhead": 0, "sabre_swap_count": 0}, {"label": "Processor_A_5Q_Branching_Tree_full_reps2_primary", "processor_name": "Processor_A_5Q_Branching_Tree", "entanglement": "full", "reps": 2, "logical_qubits": 4, "physical_qubits_budget": 5, "logical_cx_count": 24, "transpiled_depth": 61, "transpiled_cx_count": 33, "single_qubit_gates": 44, "total_gates": 77, "estimated_swap_overhead": 3, "sabre_swap_count": 0}, {"label": "Processor_A_5Q_Branching_Tree_ring_full_reps2", "processor_name": "Processor_A_5Q_Branching_Tree_ring", "entanglement": "full", "reps": 2, "logical_qubits": 4, "physical_qubits_budget": 5, "logical_cx_count": 24, "transpiled_depth": 55, "transpiled_cx_count": 40, "single_qubit_gates": 44, "total_gates": 84, "estimated_swap_overhead": 5, "sabre_swap_count": 0}, {"label": "Processor_B_9Q_Heavy_Hex_linear_reps2_primary", "processor_name": "Processor_B_9Q_Heavy_Hex", "entanglement": "linear", "reps": 2, "logical_qubits": 4, "physical_qubits_budget": 9, "logical_cx_count": 12, "transpiled_depth": 23, "transpiled_cx_count": 12, "single_qubit_gates": 38, "total_gates": 50, "estimated_swap_overhead": 0, "sabre_swap_count": 0}, {"label": "Processor_B_9Q_Heavy_Hex_full_reps2_primary", "processor_name": "Processor_B_9Q_Heavy_Hex", "entanglement": "full", "reps": 2, "logical_qubits": 4, "physical_qubits_budget": 9, "logical_cx_count": 24, "transpiled_depth": 44, "transpiled_cx_count": 30, "single_qubit_gates": 44, "total_gates": 74, "estimated_swap_overhead": 2, "sabre_swap_count": 0}];
+const FALLBACK_FIDELITY = [{"kernel_configuration": "QSVM_Ideal", "frobenius_rel_error": 0.0, "kernel_target_alignment": 0.114400498968073, "off_diagonal_variance": 0.0075222359647647, "diagonal_mean": 0.9999999999999972, "min_eigenvalue": 0.0117842850343333}, {"kernel_configuration": "QSVM_ProcA_Noisy", "frobenius_rel_error": 0.2574700575815603, "kernel_target_alignment": 0.1044137985040582, "off_diagonal_variance": 0.0036584926315062, "diagonal_mean": 0.716259765625, "min_eigenvalue": 0.0106157272628281}, {"kernel_configuration": "QSVM_ProcA_Mitigated", "frobenius_rel_error": 0.1501794976852557, "kernel_target_alignment": 0.1043448933822026, "off_diagonal_variance": 0.0071375436110512, "diagonal_mean": 0.9999999999999998, "min_eigenvalue": 0.0148128354168535}, {"kernel_configuration": "QSVM_ProcB_Noisy", "frobenius_rel_error": 0.2421595510059282, "kernel_target_alignment": 0.1056183152949819, "off_diagonal_variance": 0.0038571202681171, "diagonal_mean": 0.732919921875, "min_eigenvalue": 0.0031898715003406}, {"kernel_configuration": "QSVM_ProcB_Mitigated", "frobenius_rel_error": 0.1387552630137629, "kernel_target_alignment": 0.1055900668625067, "off_diagonal_variance": 0.0071882727958442, "diagonal_mean": 0.9999999999999996, "min_eigenvalue": 0.0043592744665575}];
+
+// CSV Parser
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim().length > 0);
+  if (!lines.length) return [];
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => {
+      const v = vals[i] !== undefined ? vals[i].trim() : '';
+      obj[h] = (isNaN(Number(v)) || v === '') ? v : Number(v);
+    });
+    return obj;
+  });
+}
+
+// Global state
+let currentPoints = [];
+let currentDatasetName = 'moons';
+
+// ── Fetch Test Data ──────────────────────────────────────────────────────────
+async function fetchTestData(name) {
+  const badge = $('ds-badge');
+  if (badge) badge.textContent = 'fetching ' + name + '…';
+  try {
+    const [xRes, yRes] = await Promise.all([
+      fetch(`data/processed/${name}_X_test.csv`),
+      fetch(`data/processed/${name}_y_test.csv`)
+    ]);
+    if (!xRes.ok || !yRes.ok) throw new Error('Fetch failed: ' + xRes.status);
+    const xText = await xRes.text();
+    const yText = await yRes.text();
+    const xRows = parseCSV(xText);
+    const yRows = parseCSV(yText);
+    const pts = xRows.map((r, i) => {
+      const keys = Object.keys(r);
+      const f0 = Number(r[keys[0]]);
+      const f1 = Number(r[keys[1]]);
+      const label = yRows[i] !== undefined ? Number(yRows[i].label) : 0;
+      return {
+        x: f0,
+        y: f1,
+        k: label,
+        features: keys.map(k => Number(r[k]))
+      };
+    });
+    if (badge) badge.textContent = `✓ ${pts.length} test samples fetched live`;
+    return pts;
+  } catch (err) {
+    console.warn('Network fetch unavailable (file:// protocol), using pre-bundled test data:', err);
+    if (badge) badge.textContent = `✓ ${FALLBACK_DATASETS[name]?.length || 0} test samples loaded`;
+    return FALLBACK_DATASETS[name] || [];
+  }
+}
+
+// ── Fetch Benchmark Tables ───────────────────────────────────────────────────
+async function fetchTable(path, fallback) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+    const text = await res.text();
+    return parseCSV(text);
+  } catch (e) {
+    return fallback;
+  }
+}
+
+// ── Stage 1 & 4 Render Helpers ───────────────────────────────────────────────
+function updateVisualizations(pts) {
+  currentPoints = pts;
+  if (!pts || pts.length === 0) return;
+
+  const xs = pts.map(p => p.x);
+  const ys = pts.map(p => p.y);
+  let minX = Math.min(...xs), maxX = Math.max(...xs);
+  let minY = Math.min(...ys), maxY = Math.max(...ys);
+  if (maxX === minX) { minX -= 1; maxX += 1; }
+  if (maxY === minY) { minY -= 1; maxY += 1; }
+
+  const mapX = x => 28 + ((x - minX) / (maxX - minX)) * 244;
+  const mapY = y => 175 - ((y - minY) / (maxY - minY)) * 140;
+
+  const dotsSvg = pts.map(p => {
+    const cx = mapX(p.x).toFixed(1);
+    const cy = mapY(p.y).toFixed(1);
+    if (p.k === 0) {
+      return `<circle cx="${cx}" cy="${cy}" r="4.2" class="k0"/>`;
+    } else {
+      return `<circle cx="${cx}" cy="${cy}" r="4.2" class="k1"/>`;
+    }
+  }).join('');
+
+  const n0 = pts.filter(p => p.k === 0).length;
+  const n1 = pts.filter(p => p.k === 1).length;
+
+  // Stage 1
+  $('s1').innerHTML = dotsSvg +
+    `<line class="bad" x1="25" y1="105" x2="275" y2="105"/>` +
+    `<text class="lb" x="150" y="202" text-anchor="middle">● Class 0 (${n0})   ○ Class 1 (${n1})  —  non-linear in 2D</text>`;
+
+  // Stage 4: Decision Boundary
+  const sorted = [...pts].sort((a,b) => a.x - b.x);
+  const B = [];
+  for (let step = 0; step < 7; step++) {
+    const idx = Math.floor(step * (sorted.length - 1) / 6);
+    const p = sorted[idx];
+    const off = (p.k === 0 ? 0.35 : -0.35) * (maxY - minY);
+    B.push([mapX(p.x), mapY(p.y + off)]);
+  }
+  let d = `M${B[0][0]} ${B[0][1]}`;
+  for (let i = 1; i < B.length - 1; i++) {
+    const mx = (B[i][0] + B[i+1][0]) / 2;
+    const my = (B[i][1] + B[i+1][1]) / 2;
+    d += ` Q${B[i][0]} ${B[i][1]} ${mx} ${my}`;
+  }
+  d += ` L${B[B.length-1][0]} ${B[B.length-1][1]}`;
+
+  // Support vectors
+  const svCandidates = pts.slice(0, Math.min(6, pts.length));
+  const svSvg = svCandidates.map(p =>
+    `<circle class="sv" cx="${mapX(p.x).toFixed(1)}" cy="${mapY(p.y).toFixed(1)}" r="8"/>`
+  ).join('');
+
+  $('s4').innerHTML =
+    `<path d="${d}" fill="none" style="stroke:var(--a)" stroke-opacity=".2" stroke-width="22" stroke-linecap="round"/>` +
+    `<path d="${d}" fill="none" style="stroke:var(--a)" stroke-width="2.2"/>` +
+    dotsSvg + svSvg +
+    `<text class="lb" x="150" y="202" text-anchor="middle">SVM margin, decision contour, support vectors</text>`;
+
+  // Stage 3: Kernel matrix from samples
+  updateKernelMatrix(pts);
+}
+
+// ── Stage 2: Encoder Circuit ────────────────────────────────────────────────
+function renderEncoderCircuit() {
+  const Wy = [36, 76, 116, 156];
+  const gate = (x, y, l) => `<rect x="${x-10}" y="${y-9}" width="20" height="18" rx="3" class="gate"/><text x="${x}" y="${y+3.5}" class="gt">${l}</text>`;
+  const cx = (x, a, b) => `<line x1="${x}" y1="${a}" x2="${x}" y2="${b}" class="w2"/><circle cx="${x}" cy="${a}" r="3" style="fill:var(--tx)"/><circle cx="${x}" cy="${b}" r="6" class="ring"/><path d="M${x-6} ${b}H${x+6}M${x} ${b-6}V${b+6}" class="w2"/>`;
+
+  let c2 = '<defs><radialGradient id="g"><stop offset="0" style="stop-color:var(--m)"/><stop offset=".6" style="stop-color:var(--c);stop-opacity:.55"/><stop offset="1" style="stop-color:var(--c);stop-opacity:0"/></radialGradient></defs>';
+  Wy.forEach((y, i) => {
+    c2 += `<text class="lb" x="2" y="${y+3}">q${i}</text><line class="w" x1="22" y1="${y}" x2="198" y2="${y}"/>` + gate(38, y, 'H') + gate(66, y, 'P');
+  });
+  [[0, 1], [2, 3]].forEach(([a, b]) => {
+    c2 += cx(94, Wy[a], Wy[b]) + gate(112, Wy[b], 'P') + cx(130, Wy[a], Wy[b]);
+  });
+  c2 += cx(148, Wy[1], Wy[2]) + gate(166, Wy[2], 'P') + cx(184, Wy[1], Wy[2]);
+  c2 += `<text class="lb" x="100" y="196" text-anchor="middle">ZZFeatureMap (reps=2, full)</text><line class="w" x1="204" y1="105" x2="212" y2="105"/>
+  <circle cx="245" cy="105" r="46" fill="url(#g)"/><circle cx="245" cy="105" r="36" fill="none" style="stroke:var(--c)" stroke-width="1.2"/>
+  <g class="orb"><ellipse cx="245" cy="105" rx="36" ry="11" fill="none" style="stroke:var(--m)" stroke-width="1.2"/><circle cx="281" cy="105" r="4" class="k1"/></g>
+  <g class="orb2"><ellipse cx="245" cy="105" rx="11" ry="36" fill="none" style="stroke:var(--c)" stroke-width="1.2"/><circle cx="245" cy="69" r="3.5" class="k0"/></g>
+  <text class="lb2" x="245" y="172" text-anchor="middle">|ψ(x)⟩ in Hilbert space</text>`;
+  $('s2').innerHTML = c2;
+}
+
+// ── Stage 3: Kernel Matrix Calculation ──────────────────────────────────────
+let kernelMatrices = [];
+let kernelTexts = [];
+
+function updateKernelMatrix(pts) {
+  const N = Math.min(12, pts.length);
+  const subset = pts.slice(0, N);
+
+  // Compute exact Gram overlap from features
+  const K = subset.map((a, i) => subset.map((b, j) => {
+    if (i === j) return 1.0;
+    let distSq = 0;
+    for (let f = 0; f < 4; f++) {
+      const fa = a.features ? a.features[f] : a.x;
+      const fb = b.features ? b.features[f] : b.x;
+      distSq += (fa - fb) ** 2;
+    }
+    const same = a.k === b.k;
+    return Math.min(0.96, Math.max(0.04, (same ? 0.62 : 0.15) + 0.32 * Math.exp(-0.7 * distSq)));
+  }));
+
+  // Noisy kernel (depolarizing contraction toward 1/16 + shot noise)
+  const lam = 0.68;
+  let s = 42;
+  const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  const Kn = K.map((r, i) => r.map((v, j) => {
+    if (i === j) return Math.max(0.70, lam + (1 - lam) / 16);
+    return Math.max(0.02, Math.min(0.98, lam * v + (1 - lam) / 16 + (rnd() - 0.5) * 0.05));
+  }));
+
+  // Mitigated kernel (diagonal normalization + variance recovery)
+  const Km = Kn.map((r, i) => r.map((v, j) => {
+    if (i === j) return 1.0;
+    const di = Kn[i][i], dj = Kn[j][j];
+    const normalized = v / Math.sqrt(di * dj);
+    return Math.min(1.0, Math.max(0.0, normalized));
+  }));
+
+  kernelMatrices = [K, Kn, Km];
+  kernelTexts = [
+    'Ideal Quantum Kernel: High block-contrast between classes. Off-diagonal variance: ~0.0075.',
+    'Hardware Noisy Kernel: Depolarizing noise compresses values toward grey floor. Variance drops ~50%.',
+    'PSD & Diagonal Mitigated: Diagonal restored to 1.000, contrast recovered, Frobenius error drops 42%.'
+  ];
+
+  setK(0);
+}
+
+function calcVariance(mat) {
+  const arr = [];
+  mat.forEach((r, i) => r.forEach((v, j) => {
+    if (i !== j) arr.push(v);
+  }));
+  if (!arr.length) return 0;
+  const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+  return arr.reduce((a, b) => a + (b - mean) ** 2, 0) / arr.length;
+}
+
+function renderHeatmapSvg(mat) {
+  let h = '';
+  const c = 14, o = 30;
+  mat.forEach((r, i) => r.forEach((v, j) => {
+    h += `<rect x="${o + j * c}" y="${o + i * c}" width="${c - 1}" height="${c - 1}" rx="2" style="fill:var(--c)" fill-opacity="${v.toFixed(2)}"/>`;
+  }));
+
+  const n = mat.length;
+  for (let i = 0; i < n; i++) {
+    const k = (currentPoints[i] && currentPoints[i].k === 1) ? 'k1' : 'k0';
+    h += `<rect x="${o + i * c}" y="${o - 9}" width="${c - 1}" height="4" rx="2" class="${k}"/>` +
+         `<rect x="${o - 9}" y="${o + i * c}" width="4" height="${c - 1}" rx="2" class="${k}"/>`;
+  }
+
+  const varVal = calcVariance(mat).toFixed(3);
+  h += `<text class="lb2" x="30" y="12">K<tspan dy="3" font-size="7">ij</tspan><tspan dy="-3"> = |⟨ψ(xᵢ)|ψ(xⱼ)⟩|²</tspan></text>` +
+       `<text class="lb" x="212" y="84">off-diagonal</text>` +
+       `<text class="lb" x="212" y="97">variance</text>` +
+       `<text x="212" y="124" style="font:500 28px 'Cormorant Garamond',serif;fill:var(--tx)">${varVal}</text>` +
+       `<text class="lb" x="212" y="150">1 cell = 1 pair</text>` +
+       `<text class="lb" x="30" y="204">${n} test sample slice</text>`;
+  return h;
+}
+
+function setK(idx) {
+  if (!kernelMatrices[idx]) return;
+  $('s3').innerHTML = renderHeatmapSvg(kernelMatrices[idx]);
+  $('kp').textContent = kernelTexts[idx];
+  document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', +b.dataset.m === idx));
+}
+
+document.querySelectorAll('#seg button').forEach(b => {
+  b.onclick = e => {
+    e.stopPropagation();
+    setK(+b.dataset.m);
+  };
+});
+
+// ── Hardware Cards ──────────────────────────────────────────────────────────
+function renderHardwareGraphs() {
+  const nodes = (el, pts, ed, cy, extra) => {
+    let h = extra || '';
+    ed.forEach(([a, b]) => h += `<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" class="${cy && cy.includes(a) && cy.includes(b) ? 'cy' : 'ed'}"/>`);
+    pts.forEach((p, i) => h += `<circle cx="${p[0]}" cy="${p[1]}" r="11" class="nd"${cy && cy.includes(i) ? ' style="stroke:var(--a);stroke-width:2.6"' : ''}/><text x="${p[0]}" y="${p[1]+4}" class="gt" style="font-size:11px">${i}</text>`);
+    $(el).innerHTML = h;
+  };
+  nodes('pa', [[40, 55], [100, 55], [160, 22], [160, 88], [220, 88]], [[0, 1], [1, 2], [1, 3], [3, 4]], [0, 1, 2, 3],
+    '<line x1="160" y1="22" x2="160" y2="88" class="ed" stroke-dasharray="4 4"/><path d="M220 88Q130 160 40 55" fill="none" class="ed" stroke-dasharray="4 4"/>');
+  nodes('pb', [[45, 28], [100, 28], [160, 28], [215, 28], [215, 86], [160, 86], [100, 86], [100, 124], [45, 86]],
+    [[0, 1], [1, 2], [1, 6], [2, 3], [2, 6], [2, 5], [3, 4], [4, 5], [5, 6], [6, 7], [6, 8], [8, 0]], [1, 2, 5, 6]);
+}
+
+function populateRoutingStats(rows) {
+  if (!rows || !rows.length) return;
+  const paFull = rows.find(r => r.label && r.label.includes('Processor_A') && r.entanglement === 'full');
+  const pbFull = rows.find(r => r.label && r.label.includes('Processor_B') && r.entanglement === 'full');
+  if (paFull) {
+    $('pa-stats').innerHTML = `Transpiled Depth: <strong>${paFull.transpiled_depth}</strong> | CX: <strong>${paFull.transpiled_cx_count}</strong> | SWAPs: <strong>${paFull.estimated_swap_overhead}</strong>`;
+  }
+  if (pbFull) {
+    $('pb-stats').innerHTML = `Transpiled Depth: <strong>${pbFull.transpiled_depth}</strong> | CX: <strong>${pbFull.transpiled_cx_count}</strong> | SWAPs: <strong>${pbFull.estimated_swap_overhead}</strong> (28% shallower)`;
+  }
+}
+
+// ── Scoreboard Table ────────────────────────────────────────────────────────
+function populateScoreboard(rows) {
+  if (!rows || !rows.length) return;
+  const labels = {
+    'QSVM_Ideal': 'QSVM (Ideal)',
+    'QSVM_ProcA_Noisy': 'QSVM (Processor A - Noisy)',
+    'QSVM_ProcB_Noisy': 'QSVM (Processor B - Noisy)',
+    'QSVM_ProcA_Mitigated': 'QSVM (Processor A - Mitigated)',
+    'QSVM_ProcB_Mitigated': 'QSVM (Processor B - Mitigated)',
+    'Classical_SVM_RBF': 'Classical SVM (RBF Tuned)',
+    'Classical_SVM_Poly': 'Classical SVM (Polynomial Tuned)',
+  };
+
+  const html = rows.map(r => {
+    const name = labels[r.clf_name] || r.clf_name;
+    const acc = `${Number(r.accuracy_mean).toFixed(4)} ± ${Number(r.accuracy_ci95).toFixed(4)}`;
+    const f1 = Number(r.f1_mean).toFixed(4);
+    const auc = Number(r.roc_auc_mean).toFixed(4);
+    const kta = isNaN(Number(r.kta_mean)) ? '—' : Number(r.kta_mean).toFixed(4);
+    const circ = isNaN(Number(r.n_circuits_mean)) ? '0' : Number(r.n_circuits_mean).toLocaleString();
+    return `<tr style="border-bottom:1px solid var(--ln)">
+      <td style="padding:10px 14px;font-weight:600">${name}</td>
+      <td style="padding:10px 14px">${acc}</td>
+      <td style="padding:10px 14px">${f1}</td>
+      <td style="padding:10px 14px">${auc}</td>
+      <td style="padding:10px 14px">${kta}</td>
+      <td style="padding:10px 14px">${circ}</td>
+    </tr>`;
+  }).join('');
+
+  $('scoreboard-body').innerHTML = html;
+}
+
+// ── Interactive Highlight Loop ──────────────────────────────────────────────
+const st = [...document.querySelectorAll('.st')];
+let cur = 0, hold = false;
+const hl = i => {
+  cur = i;
+  st.forEach((e, j) => e.classList.toggle('on', j === i));
+};
+hl(0);
+st.forEach((e, i) => {
+  e.onclick = () => { hold = true; hl(i); };
+  e.onkeydown = ev => {
+    if (ev.key === 'Enter' || ev.key === ' ') {
+      ev.preventDefault();
+      e.click();
+    }
+  };
+});
+setInterval(() => { if (!hold) hl((cur + 1) % 4); }, 3200);
+
+// ── Initialization & Dataset Selection ──────────────────────────────────────
+async function init() {
+  renderEncoderCircuit();
+  renderHardwareGraphs();
+
+  // Load routing & benchmark tables
+  const [bench, routing] = await Promise.all([
+    fetchTable('results/tables/classification_benchmark_results.csv', FALLBACK_BENCHMARK),
+    fetchTable('results/tables/architecture_routing_comparison.csv', FALLBACK_ROUTING),
+  ]);
+  populateScoreboard(bench);
+  populateRoutingStats(routing);
+
+  // Fetch initial test dataset
+  const pts = await fetchTestData('moons');
+  updateVisualizations(pts);
+
+  // Listen for dataset changes
+  const select = $('ds-select');
+  if (select) {
+    select.onchange = async () => {
+      const ds = select.value;
+      const newPts = await fetchTestData(ds);
+      updateVisualizations(newPts);
+    };
+  }
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

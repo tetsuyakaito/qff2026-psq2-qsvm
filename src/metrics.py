@@ -171,43 +171,43 @@ def _simulate_density_matrices(
     List of density matrix arrays, each shape ``(2^n, 2^n)``.
     """
     params = list(feature_map.parameters)
-    n      = feature_map.num_qubits
 
-    # ── Transpile the feature map ONCE (no save_density_matrix yet) ───────────
-    # We transpile a bound copy (first sample) for structure, then re-use the
-    # transpiled qubit layout for every subsequent sample. save_density_matrix
-    # is an Aer-only instruction and must be appended AFTER transpilation so
-    # that BasisTranslator never sees it.
-    bound_0 = feature_map.assign_parameters(dict(zip(params, X[0])))
-    transpiled_0 = transpile(
-        bound_0,
-        coupling_map=coupling_map,
-        basis_gates=basis_gates,
-        optimization_level=1,
-        seed_transpiler=seed,
-    )
-
-    density_matrices: List[np.ndarray] = []
-
-    for x in X:
-        # Bind parameters for this sample
-        qc_bound = feature_map.assign_parameters(dict(zip(params, x)))
-        # Transpile (same structure → same layout, only angles differ)
-        qc_t = transpile(
-            qc_bound,
+    # ── Transpile parameterized feature map circuit ONCE ─────────────────────
+    try:
+        qc_template = transpile(
+            feature_map,
             coupling_map=coupling_map,
             basis_gates=basis_gates,
             optimization_level=1,
             seed_transpiler=seed,
         )
-        # Append the Aer-only save instruction AFTER transpilation
-        qc_t.save_density_matrix()
+        qc_template.save_density_matrix()
 
-        result = noisy_sim.run(qc_t).result()
-        dm     = np.array(result.data()["density_matrix"])
-        density_matrices.append(dm)
-
-    return density_matrices
+        circuits = [
+            qc_template.assign_parameters(dict(zip(params, x)))
+            for x in X
+        ]
+        result = noisy_sim.run(circuits).result()
+        try:
+            return [np.array(result.data(i)["density_matrix"]) for i in range(len(X))]
+        except Exception:
+            return [np.array(result.data(qc)["density_matrix"]) for qc in circuits]
+    except Exception:
+        # Fallback to per-sample execution if batch/parameterized save is unsupported
+        density_matrices: List[np.ndarray] = []
+        for x in X:
+            qc_bound = feature_map.assign_parameters(dict(zip(params, x)))
+            qc_t = transpile(
+                qc_bound,
+                coupling_map=coupling_map,
+                basis_gates=basis_gates,
+                optimization_level=1,
+                seed_transpiler=seed,
+            )
+            qc_t.save_density_matrix()
+            res = noisy_sim.run(qc_t).result()
+            density_matrices.append(np.array(res.data()["density_matrix"]))
+        return density_matrices
 
 
 def _multinomial_shot_noise(
@@ -239,14 +239,16 @@ def _multinomial_shot_noise(
 def compute_noisy_hardware_kernel(
     X1:           np.ndarray,
     X2:           np.ndarray,
-    feature_map:  QuantumCircuit,
-    cfg:          ProcessorConfig,
+    feature_map:  Optional[QuantumCircuit] = None,
+    cfg:          Any = None,
     shots:        int  = DEFAULT_SHOTS,
     seed:         int  = DEFAULT_SEED,
     mode:         str  = "density_matrix_plus_shot_sampling",
+    transpiled_feature_map_or_kernel_qc: Optional[QuantumCircuit] = None,
+    noise_model:  Optional[Any] = None,
 ) -> np.ndarray:
     """
-    Compute the **noisy** quantum kernel matrix on a specified processor.
+    Compute the **noisy** quantum kernel matrix on a specified processor or NoiseModel.
 
     Two computation modes
     --------------------
@@ -268,34 +270,53 @@ def compute_noisy_hardware_kernel(
     X1          : np.ndarray (n1, 4).  Left feature matrix.
     X2          : np.ndarray (n2, 4).  Right feature matrix.
     feature_map : Parameterized 4-qubit QuantumCircuit.
-    cfg         : ProcessorConfig (supplies coupling_map, noise_model, etc.).
+    cfg         : ProcessorConfig or NoiseModel.
     shots       : int, number of measurement shots for shot-noise model.
     seed        : int, RNG seed for reproducible shot noise.
     mode        : "density_matrix_plus_shot_sampling" | "shot_based".
+    transpiled_feature_map_or_kernel_qc : Alias for feature_map.
+    noise_model : Alias / direct pass for noise model.
 
     Returns
     -------
     K : np.ndarray, shape (n1, n2), float64.
     """
-    noise_model = build_noise_model(cfg)
+    fm = transpiled_feature_map_or_kernel_qc if transpiled_feature_map_or_kernel_qc is not None else feature_map
+    if fm is None:
+        raise ValueError("A feature map circuit must be provided.")
+
+    target = noise_model if noise_model is not None else cfg
+    if target is None:
+        raise ValueError("A ProcessorConfig or NoiseModel must be provided.")
+
+    if isinstance(target, NoiseModel) or (hasattr(target, "basis_gates") and not hasattr(target, "noise_params")):
+        nm = target
+        basis_gates = getattr(nm, "basis_gates", ["rz", "sx", "x", "cx"])
+        directed_cm = None
+        coupling_map = None
+    else:
+        nm = build_noise_model(target)
+        basis_gates = target.basis_gates
+        directed_cm = target.directed_coupling_map
+        coupling_map = target.coupling_map
 
     if mode == "density_matrix_plus_shot_sampling":
 
         # ── Density-matrix simulator ───────────────────────────────────────────
         dm_sim = AerSimulator(
             method="density_matrix",
-            noise_model=noise_model,
-            basis_gates=cfg.basis_gates,
-            coupling_map=cfg.directed_coupling_map,
+            noise_model=nm,
+            basis_gates=basis_gates,
+            coupling_map=directed_cm,
         )
 
         rho1 = _simulate_density_matrices(
-            X1, feature_map, dm_sim, cfg.coupling_map,
-            cfg.basis_gates, seed=seed,
+            X1, fm, dm_sim, coupling_map,
+            basis_gates, seed=seed,
         )
         rho2 = _simulate_density_matrices(
-            X2, feature_map, dm_sim, cfg.coupling_map,
-            cfg.basis_gates, seed=seed,
+            X2, fm, dm_sim, coupling_map,
+            basis_gates, seed=seed,
         )
 
         # ── Noisy overlap Tr(ρᵢ ρⱼ) ──────────────────────────────────────────
@@ -304,10 +325,6 @@ def compute_noisy_hardware_kernel(
         R2 = np.stack(rho2, axis=0)   # (n2, 2^n, 2^n)
 
         # Tr(ρᵢ ρⱼ) = einsum('iab,jba->', R1, R2) in one shot per row:
-        # K[i,j] = |sum_a sum_b R1[i,a,b] * R2[j,b,a]|
-        #         = |Tr(R1[i] @ R2[j].T)|
-        # Vectorised: K = |einsum('iab,jab->ij', R1, R2.conj())|
-        # (equals Tr because Tr(A B) = sum_{ab} A_{ab} B_{ba} = sum_{ab} A_{ab} (B^T)_{ab})
         K_dm = np.abs(
             np.einsum("iab,jab->ij", R1, R2.conj())
         ).real.astype(np.float64)
@@ -320,17 +337,17 @@ def compute_noisy_hardware_kernel(
 
     elif mode == "shot_based":
         # Full shot-based mode — intended for small subsets / verification
-        kernel_qc = build_parametrized_kernel_circuit(feature_map)
+        kernel_qc = build_parametrized_kernel_circuit(fm)
         noisy_sim = AerSimulator(
-            noise_model=noise_model,
-            basis_gates=cfg.basis_gates,
-            coupling_map=cfg.directed_coupling_map,
+            noise_model=nm,
+            basis_gates=basis_gates,
+            coupling_map=directed_cm,
         )
         # Transpile the kernel circuit ONCE
         kernel_qc_t = transpile(
             kernel_qc,
-            coupling_map=cfg.coupling_map,
-            basis_gates=cfg.basis_gates,
+            coupling_map=coupling_map,
+            basis_gates=basis_gates,
             optimization_level=1,
             seed_transpiler=seed,
         )
@@ -560,6 +577,31 @@ class ClassifierResult:
     n_circuits: int          # Total circuit executions = N*(N-1)//2 for train kernel
 
 
+class ClassifierResultsDict(dict):
+    """Dictionary holding aggregated evaluation results with prompt alias support."""
+    _ALIASES = {
+        "QSVM (Ideal)": "QSVM_Ideal",
+        "QSVM (Processor A - Noisy)": "QSVM_ProcA_Noisy",
+        "QSVM (Processor B - Noisy)": "QSVM_ProcB_Noisy",
+        "QSVM (Processor A - Mitigated)": "QSVM_ProcA_Mitigated",
+        "QSVM (Processor B - Mitigated)": "QSVM_ProcB_Mitigated",
+        "Classical SVM (RBF - GridSearchCV tuned C and gamma)": "Classical_SVM_RBF",
+        "Classical SVM (Polynomial - GridSearchCV tuned degree, C, gamma)": "Classical_SVM_Poly",
+    }
+
+    def __getitem__(self, key):
+        canonical = self._ALIASES.get(key, key)
+        return super().__getitem__(canonical)
+
+    def get(self, key, default=None):
+        canonical = self._ALIASES.get(key, key)
+        return super().get(canonical, default)
+
+    def __contains__(self, key):
+        canonical = self._ALIASES.get(key, key)
+        return super().__contains__(canonical)
+
+
 def _train_qsvm(
     K_train:  np.ndarray,
     y_train:  np.ndarray,
@@ -680,7 +722,7 @@ def _aggregate_results(
     for r in results:
         by_clf[r.clf_name].append(r)
 
-    agg: Dict[str, Dict[str, float]] = {}
+    agg: Dict[str, Dict[str, float]] = ClassifierResultsDict()
     for clf_name, rs in by_clf.items():
         metrics_vals: Dict[str, List[float]] = {
             "accuracy":   [r.accuracy   for r in rs],
@@ -871,7 +913,7 @@ def evaluate_classifiers(
                   f"acc={row['accuracy_mean']:.4f}±{row['accuracy_ci95']:.4f}  "
                   f"f1={row['f1_mean']:.4f}  "
                   f"auc={row['roc_auc_mean']:.4f}  "
-                  f"kta={row['kta_mean']:.4f}")
+                  f"kta={row.get('kta_mean', float('nan')):.4f}")
 
     return aggregated
 
