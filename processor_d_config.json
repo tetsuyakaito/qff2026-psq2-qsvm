@@ -1,0 +1,36 @@
+{
+  "processor_id": "processor_d_k4_core_v2",
+  "n_qubits": 6,
+  "coupling_map": [
+    [0, 1], [1, 0],
+    [0, 2], [2, 0],
+    [0, 3], [3, 0],
+    [1, 2], [2, 1],
+    [1, 3], [3, 1],
+    [2, 3], [3, 2],
+    [0, 4], [4, 0],
+    [3, 4], [4, 3],
+    [1, 5], [5, 1],
+    [2, 5], [5, 2]
+  ],
+  "native_gate_set": ["rx", "ry", "rz", "cx"],
+  "qubit_layout": "custom",
+  "noise_assumptions": {
+    "single_qubit_error_rate": 0.01,
+    "two_qubit_error_rate": 0.05,
+    "readout_error_rate": 0.02,
+    "t1_us": 100,
+    "t2_us": 80,
+    "notes": "The quoted gate and readout rates match the fixed QFF2026-v2 model for transparent comparison. These descriptive assumptions do not configure the benchmark; it imports the organizer noise model unchanged. Task B uses gate noise only and does not measure, so readout error is not applied."
+  },
+  "design_rationale": "This six-qubit custom topology preserves the Phase 1 K4 computational core on qubits 0-3 and its two connected ancillae. Bidirectional CX links on the K4 support every pair in a four-qubit all-to-all ZZ feature map without routing SWAPs, while the same core contains the three logical QFT-3 qubits. The rx/ry/rz/cx basis is universal for these circuits and each gate is covered by the QFF2026-v2 noise model. The two ancillae increase connectivity options but also add physical resources that the four-qubit kernel does not need; the benchmark does not establish classifier accuracy or optimality.",
+  "benchmark_results": {
+    "qft3_circuit_depth_before_transpile": 6,
+    "qft3_circuit_depth_after_transpile": 18,
+    "qft3_two_qubit_gate_count": 9,
+    "qft3_swap_overhead": 0,
+    "qft3_fidelity_ideal": 1.0,
+    "qft3_fidelity_noisy": 0.668377,
+    "benchmark_noise_model_version": "QFF2026-v2"
+  }
+}

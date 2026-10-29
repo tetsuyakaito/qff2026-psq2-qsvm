@@ -1,0 +1,180 @@
+{
+  "dataset": {
+    "training_rows_available": 800,
+    "training_subset_rows": 200,
+    "training_subset_class_counts": {
+      "A": 97,
+      "B": 103
+    },
+    "test_rows": 200,
+    "test_ids_preserved": true,
+    "test_labels_used": false,
+    "features_used_for_reduction": [
+      "x01",
+      "x02",
+      "x03",
+      "x04",
+      "x05",
+      "x06"
+    ],
+    "pca_components": 4,
+    "classical_baseline_features": [
+      "x01",
+      "x02",
+      "x03",
+      "x04",
+      "x05",
+      "x06"
+    ]
+  },
+  "model_selection": {
+    "method": "3-fold stratified cross-validation on training subset only",
+    "quantum_selected_C": 100.0,
+    "classical_selected_parameters": {
+      "kernel": "RBF",
+      "C": 1.0,
+      "gamma": 0.3
+    },
+    "balanced_accuracy_cv": {
+      "quantum_ideal": 0.5148146379764027,
+      "quantum_noisy": 0.509912677192089,
+      "classical_rbf": 0.607845789831084
+    },
+    "quantum_cv_scores_by_C": {
+      "ideal": {
+        "0.01": 0.5,
+        "0.1": 0.5,
+        "1.0": 0.4736562049062049,
+        "10.0": 0.5014827900857313,
+        "100.0": 0.5148146379764027
+      },
+      "noisy": {
+        "0.01": 0.5,
+        "0.1": 0.5,
+        "1.0": 0.48330309396485865,
+        "10.0": 0.4965545687972159,
+        "100.0": 0.509912677192089
+      }
+    },
+    "classical_cv_scores_by_parameters": {
+      "C=0.01,gamma=0.01": 0.5,
+      "C=0.01,gamma=0.03": 0.5,
+      "C=0.01,gamma=0.1": 0.5,
+      "C=0.01,gamma=0.3": 0.5,
+      "C=0.01,gamma=1.0": 0.5,
+      "C=0.01,gamma=3.0": 0.5,
+      "C=0.01,gamma=10.0": 0.5,
+      "C=0.1,gamma=0.01": 0.5,
+      "C=0.1,gamma=0.03": 0.5,
+      "C=0.1,gamma=0.1": 0.5,
+      "C=0.1,gamma=0.3": 0.5,
+      "C=0.1,gamma=1.0": 0.5,
+      "C=0.1,gamma=3.0": 0.5,
+      "C=0.1,gamma=10.0": 0.5,
+      "C=1.0,gamma=0.01": 0.5264525507172565,
+      "C=1.0,gamma=0.03": 0.5797839211442153,
+      "C=1.0,gamma=0.1": 0.5509053242509124,
+      "C=1.0,gamma=0.3": 0.607845789831084,
+      "C=1.0,gamma=1.0": 0.5716179653679654,
+      "C=1.0,gamma=3.0": 0.5324306616586029,
+      "C=1.0,gamma=10.0": 0.510705266955267,
+      "C=10.0,gamma=0.01": 0.5908040488922842,
+      "C=10.0,gamma=0.03": 0.5372501273236567,
+      "C=10.0,gamma=0.1": 0.5353230307274425,
+      "C=10.0,gamma=0.3": 0.530457410236822,
+      "C=10.0,gamma=1.0": 0.5677836664969018,
+      "C=10.0,gamma=3.0": 0.5333404952890247,
+      "C=10.0,gamma=10.0": 0.5159136002886003,
+      "C=100.0,gamma=0.01": 0.5323396782955606,
+      "C=100.0,gamma=0.03": 0.50958853238265,
+      "C=100.0,gamma=0.1": 0.5394729861641626,
+      "C=100.0,gamma=0.3": 0.49519830659536535,
+      "C=100.0,gamma=1.0": 0.5677836664969018,
+      "C=100.0,gamma=3.0": 0.5333404952890247,
+      "C=100.0,gamma=10.0": 0.5159136002886003
+    },
+    "test_labels_used_for_selection": false
+  },
+  "quantum_kernel": {
+    "qubits": 4,
+    "feature_map": "H-RZ data encoding plus all-pairs ZZ interactions on K4",
+    "entangling_pairs": 6,
+    "compiled_feature_map_depth": 17,
+    "compiled_two_qubit_gate_count": 12,
+    "ideal_noisy_kernel_mean_absolute_difference": 0.11912929142053383,
+    "ideal_noisy_training_kernel_alignment": 0.9894587181514606,
+    "ideal_training_kernel_off_diagonal_std": 0.12197832316036968,
+    "noisy_training_kernel_off_diagonal_std": 0.10880515563280445,
+    "kernel_definition": "Ideal squared state overlap; noisy normalized Hilbert-Schmidt overlap Tr(rho_i rho_j)/sqrt(Tr(rho_i^2)Tr(rho_j^2)).",
+    "noise_model_version": "QFF2026-v2"
+  },
+  "resource_cost": {
+    "folds": 3,
+    "state_preparation_circuit_evaluations": 2000,
+    "unique_symmetric_kernel_values": 281000,
+    "test_prediction_model": "Noisy QFF2026-v2 kernel",
+    "training_wall_time_seconds": 98.371,
+    "transpiler_seed": 42
+  },
+  "prediction_file": "predictions_q2.csv",
+  "prediction_rows": 200,
+  "diagnostics": {
+    "mean_fold_centered_kernel_alignment": 0.9908186225101278,
+    "cv_fold_scores": {
+      "quantum_ideal": {
+        "0.01": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "0.1": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "1.0": [
+          0.5147186147186147,
+          0.4375,
+          0.46875
+        ],
+        "10.0": [
+          0.5173160173160173,
+          0.5330882352941176,
+          0.4540441176470588
+        ],
+        "100.0": [
+          0.5021645021645021,
+          0.5441176470588236,
+          0.49816176470588236
+        ]
+      },
+      "quantum_noisy": {
+        "0.01": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "0.1": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "1.0": [
+          0.4701298701298701,
+          0.5119485294117647,
+          0.4678308823529412
+        ],
+        "10.0": [
+          0.48874458874458876,
+          0.5477941176470589,
+          0.453125
+        ],
+        "100.0": [
+          0.5021645021645021,
+          0.5294117647058824,
+          0.49816176470588236
+        ]
+      }
+    }
+  }
+}

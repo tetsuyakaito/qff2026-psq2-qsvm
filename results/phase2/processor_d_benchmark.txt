@@ -1,0 +1,10 @@
+Processor D design is valid. Official QFT-3 benchmark_results:
+{
+  "qft3_circuit_depth_before_transpile": 6,
+  "qft3_circuit_depth_after_transpile": 18,
+  "qft3_two_qubit_gate_count": 9,
+  "qft3_swap_overhead": 0,
+  "qft3_fidelity_ideal": 1.0,
+  "qft3_fidelity_noisy": 0.668377,
+  "benchmark_noise_model_version": "QFF2026-v2"
+}
