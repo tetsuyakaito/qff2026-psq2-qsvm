@@ -1,154 +1,160 @@
-# Qiskit Fall Fest 2026 — Track 4 (QML)
-## PS-Q2: Quantum Kernel Estimator & Support Vector Machine (QSVM)
+# Qiskit Fall Fest 2026 — Quantum Machine Learning
 
-Benchmark and architectural evaluation of 4-qubit Quantum Support Vector Machines (QSVM) using parameterized `ZZFeatureMap` circuits evaluated under frozen QFF 2026 synthetic noise on **Processor A** (5 physical qubits, branching-tree topology), **Processor B** (9 physical qubits, heavy-hex topology), and **Processor D** (6 physical qubits, diamond-coupled $K_4$ co-design).
+## PS-Q2: Quantum Kernel Classification
 
----
+This repository contains the Phase 2 PS-Q2 submission and its two common benchmark tasks: Bell-state fidelity (Task A) and Processor D design/QFT-3 benchmarking (Task B). Phase 1 materials are retained as project history; use **solution.ipynb** for the Phase 2 run.
 
-##  Reproduce Everything in One Go
+## Results at a glance
 
-To reproduce all results, benchmark tables, 300-DPI publication figures, and executed notebook cleanly from scratch:
+| Experiment | Result |
+|---|---:|
+| Task A Bell fidelity, ideal | 1.0000 |
+| Task A Bell fidelity, QFF2026-v2 noisy | **0.8801 ± 0.0026** |
+| Processor D QFT-3 SWAP overhead | **0** |
+| Processor D QFT-3 noisy fidelity | 0.668377 |
+| PS-Q2 ideal quantum-kernel CV balanced accuracy | 0.5148 |
+| PS-Q2 noisy quantum-kernel CV balanced accuracy | 0.5099 |
+| PS-Q2 classical RBF-SVM CV balanced accuracy | **0.6078** |
 
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+Task A and Task B values are simulations under the organizer's benchmark conditions, not hardware measurements. PS-Q2 scores are mean training-only cross-validation estimates, not test-set scores. The current experiment does not show a quantum-classification advantage over the classical RBF baseline; that result is reported directly.
 
-# 2. Run complete end-to-end pipeline deterministically
-python3 run_all.py
-```
+## Project contents
 
-`run_all.py` executes the entire workflow in ~3.5 minutes:
-- Transpiles all configurations with fixed seed `42`
-- Runs 5-seed stratified SVM benchmark (`seeds = [42, 100, 2026, 7, 99]`)
-- Auto-handles Linux OpenMP/TLS (`libgomp`) seamlessly
-- Generates all five 300-DPI publication figures in `results/figures/`
-- Generates LaTeX-rendered equation PNG assets in `assets/qff_phase1_latex_images/`
-- Builds and executes `main.ipynb` saving all outputs and tables
-- Runs `audit_repo.py` to confirm 100% submission compliance
+| File or directory | Purpose |
+|---|---|
+| [solution.ipynb](./solution.ipynb) | Phase 2 entry point: Task A, Task B, PS-Q2 model, results, and predictions |
+| [processor_d_config.json](./processor_d_config.json) | Phase 2 Processor D configuration and official QFT-3 benchmark results |
+| [q2_solution.py](./q2_solution.py) | PS-Q2 preprocessing, ideal/noisy quantum kernels, classical baseline, CV, and test predictions |
+| [results.md](./results.md) | Results, interpretation, resource costs, and limitations |
+| [predictions_q2.csv](./predictions_q2.csv) | Predictions for the 200 unlabeled Q2 test samples |
+| [results/phase2/](./results/phase2/) | Saved Bell, Processor D, and PS-Q2 outputs |
+| **benchmark/**, **noise_model/**, **schemas/**, **tools/** | QFF2026 QML kit v3 benchmark, noise model, schemas, and validator |
+| **data/q2/** | Official Q2 training and unlabeled test-feature files |
+| **qml-requirements.txt** | Pinned QML-track environment |
+| [pip_freeze.txt](./pip_freeze.txt) | Recorded environment package freeze |
+| **main.ipynb**, **report.md**, **processors/** | Retained Phase 1 work; these are not the Phase 2 notebook/config |
 
----
+Use **processor_d_config.json** for the Phase 2 benchmark. **processors/processor_D.json** is the earlier Phase 1 format and does not replace the Phase 2 configuration.
 
-##  Repository Architecture
+## PS-Q2: dataset and method
 
-```text
-├── run_all.py             # Master 1-command reproduction script (end-to-end)
-├── audit_repo.py          # Submission compliance auditor (verifies 20 files & rubric keywords)
-├── generate_notebook.py   # Programmatic generator & executor for main.ipynb
-├── main.ipynb             # Fully executed, publication-ready Jupyter notebook
-├── report.md              # Comprehensive Phase 1 technical evaluation report
-├── requirements.txt       # Pinned dependencies
-├── processors/
-│   ├── processor_A.json   # 5-qubit branching tree + custom ring alternative
-│   ├── processor_B.json   # 9-qubit heavy-hex-style graph with cycle [1,2,5,6] & chord (2,6)
-│   └── processor_D.json   # 6-qubit diamond-coupled co-design (K_4 core, strictly 0 SWAPs)
-├── src/
-│   ├── __init__.py        # Public package API re-exports
-│   ├── processors.py      # Processor configs (A, B, D), AerSimulator, frozen NoiseModel
-│   ├── problem.py         # Primary (make_moons), secondary & quantum datasets, circuits
-│   ├── routing.py         # Transpilation analysis, depth, CX, and SWAP overhead
-│   ├── metrics.py         # Ideal & noisy density-matrix kernel estimation, PSD mitigation, SVM benchmarking
-│   └── visualization.py   # Publication-grade figures (300 DPI) & LaTeX equation rendering
-├── assets/
-│   └── qff_phase1_latex_images/  # High-res 300-DPI rendered equation PNGs
-├── data/
-│   ├── raw/               # Raw unscaled/unexpanded numpy arrays
-│   └── processed/         # Processed [0, π]^4 feature matrices and labels (npy & CSV)
-└── results/
-    ├── figures/           # Generated figures (fig1-fig5 at 300 DPI)
-    └── tables/            # Exported benchmark CSVs (routing & classification)
-```
+The QML-HIGHD-KER dataset has 800 labeled training rows, 200 unlabeled test rows, and 50 standardized features. The feature dictionary identifies x01–x06 as the signal-bearing features. The official kit provides no validation partition and no test labels.
 
----
+To control the cost of a full quadratic kernel matrix, the experiment selects a stratified subset of 200 training rows (97 class A, 103 class B). The same subset and three stratified folds are used for quantum and classical model selection. Within each fold, standardization and PCA are fitted only on that fold's training rows. The quantum model projects the six signal features to four PCA components and encodes them with a four-qubit all-pairs ZZ feature map. The classical RBF-SVM retains all six standardized signal features; this feature-dimension difference is documented in the results.
 
-##  Official Documents & Hackathon Cell Clarification Inquiries
+The ideal kernel is the squared state overlap. The noisy kernel uses density matrices generated under the unmodified QFF2026-v2 gate-noise model and the normalized Hilbert–Schmidt overlap:
 
-During our rigorous topological audit against IBM Quantum standards and QFF 2026 challenge texts, our team identified three critical discrepancies. We document them here for clarity and have formulated the corresponding clarification queries for the Hackathon Organizing Cell:
+~~~~text
+K_noisy(i,j) = Tr(rho_i rho_j) / sqrt(Tr(rho_i^2) Tr(rho_j^2))
+~~~~
 
-### 1. Processor A: T-Shaped Tree vs. Linear Chain Discrepancy
-- **Observation**: Challenge documentation versions conflict regarding Processor A's coupling map:
-  - *Variant 1 (Branching Tree)*: $E_A = \{(0, 1), (1, 2), (1, 3), (3, 4)\}$, where node 1 has degree 3.
-  - *Variant 2 (Linear Chain)*: $E_A = \{(0, 1), (1, 2), (2, 3), (3, 4)\}$, with max degree 2.
-- **Repository Implementation**: We implemented the **T-shaped branching tree** as canonical `processors/processor_A.json` to showcase the topological bottleneck caused by the degree-3 junction (which forces **3 SWAP gates** on full entanglement). We also evaluated the linear chain (0 SWAPs) and custom ring (55 depth).
-- **Formal Hackathon Cell Inquiry**: *"Could the technical committee confirm which coupling map is official for grading: the T-shaped tree with junction qubit 1, or the 1D linear chain?"*
+The noisy circuit is transpiled to the organizer's covered basis, and the code checks that all circuit gates are noise-covered. Test labels are not loaded or used. The final model writes one sample_id,label prediction for each test ID.
 
-### 2. Processor B: Heavy-Hex Naming vs. Short Cycles (Girth Analysis)
-- **Observation**: Real IBM heavy-hex lattices (e.g., Falcon, Eagle, Heron) are bipartite graphs consisting of hexagonal faces separated by degree-2 bridge qubits, with a minimum cycle length (girth) of **6**. They have **strictly no triangles or 4-cycles**.
-- However, the problem specification explicitly defines Processor B with 12 edges:
-  $$E_B = \{(0, 1), (1, 2), (1, 6), (2, 3), (2, 6), (2, 5), (3, 4), (4, 5), (5, 6), (6, 7), (6, 8), (8, 0)\}$$
-  In this graph, nodes `[1, 2, 5, 6]` form a 4-cycle with chord `(2, 6)`, containing short 3-cycles `(1, 2, 6)` and `(2, 5, 6)`.
-- **Topological Checker Note**: A strict graph-theory checker will flag Processor B as a **chordal planar graph**, not a pure heavy-hex lattice.
-- **Repository Implementation**: We faithfully implemented the **exact 12-edge graph** as mandated by the problem prompt in `processors/processor_B.json`, identifying `[1, 2, 5, 6]` as the optimal 4-qubit routing subgraph (2 SWAPs vs. 3 on Processor A).
-- **Formal Hackathon Cell Inquiry**: *"Processor B is titled 'heavy-hex-inspired' but contains short 3-cycles and 4-cycles on [1,2,5,6] with chord (2,6). Should automated grading expect this exact 12-edge graph, or a bipartite subgraph with girth >= 6?"*
+### PS-Q2 cross-validation results
 
-##  Processor D Ideology: Custom Co-Designed Topology
+| Model | Selected settings | Balanced accuracy |
+|---|---|---:|
+| Quantum kernel, ideal | C = 100; 4 PCA components | 0.5148 |
+| Quantum kernel, QFF2026-v2 noisy | C = 100; 4 PCA components | 0.5099 |
+| Classical RBF-SVM | C = 1; gamma = 0.3 | **0.6078** |
 
-In our technical report ([`report.md`](file:///home/mrudula/qff2026-psq2-qsvm/report.md)), we detail the **Processor D Ideology**:
-- **Empirical Routing Bottlenecks**: Full entanglement on Processor A (branching tree) incurs **3 SWAP gates** (depth 61), while Processor B incurs **2 SWAP gates** (depth 44). Every SWAP decomposes into 3 physical CX gates, accelerating depolarizing noise accumulation and causing severe **kernel concentration**.
-- **Processor D Co-Design (`processors/processor_D.json`)**: We architected **Processor D**, an application-specific co-designed quantum processor featuring a 4-qubit computational core $\{0, 1, 2, 3\}$ with complete graph connectivity ($K_4$, 6 native CX edges) flanked by 2 flag ancillae $\{4, 5\}$.
-- **Theoretical Guarantees**:
-  - **Strictly 0 SWAP gates** for `ZZFeatureMap(entanglement='full')`.
-  - Transpiled depth drops from **61 (Proc A)** and **44 (Proc B)** directly to **23 (Proc D)** — an immediate **62.3% depth savings**.
-  - Completely eliminates noise-induced kernel concentration, preserving full theoretical kernel variance ($\sigma^2 \approx 0.0079$).
+The noisy quantum kernel has a mean absolute training-kernel difference of 0.1191 from the ideal kernel and centered kernel alignment of 0.9895. Its off-diagonal standard deviation changes from 0.1220 (ideal) to 0.1088 (noisy). The reported balanced-accuracy values are model-selection estimates on training folds; test accuracy is unavailable because Q2 test labels are held by the organizers.
 
----
+### PS-Q2 resource use
 
-##  Fixed Seeds & Reproducibility Guarantees
+- 4 qubits; 4 PCA components.
+- Compiled feature-map depth: 17.
+- Two-qubit gates per feature-map circuit: 12.
+- 2,000 state-preparation circuit simulations and 281,000 unique symmetric kernel entries across model selection and final inference.
+- The recorded run took about 98 seconds; runtime depends on the machine.
 
-Every benchmark in this repository is strictly deterministic:
-- **Transpilation Seed**: `seed_transpiler = 42`
-- **Data Generation Seed**: `random_state = 42`
-- **5-Seed Cross-Evaluation**: `seeds = [42, 100, 2026, 7, 99]`
-- **Quantum Shot Count**: `shots = 4096`
+## Processor D: topology and benchmark
 
-### Summary Results Across 5 Random Seeds:
+Processor D has six qubits. Qubits 0–3 form a complete, bidirectional K₄ computational core; qubits 4 and 5 are connected ancillae. The K₄ gives every pair in the four-qubit all-pairs feature map a direct link. Native gates are rx, ry, rz, and cx. The coupling map lists both directions for every link.
 
-| Model | Test Accuracy (Mean ± 95% CI) | F1-Score (Mean ± 95% CI) | ROC-AUC (Mean ± 95% CI) | KTA | SWAP Overhead |
-|---|:---:|:---:|:---:|:---:|:---:|
-| **QSVM (Ideal)** | **0.8000 ± 0.0982** | 0.7958 ± 0.0995 | 0.8460 ± 0.1212 | 0.1037 | 0 |
-| **QSVM (Proc A Noisy)** | 0.7800 ± 0.0942 | 0.7803 ± 0.0869 | 0.8380 ± 0.0914 | 0.0949 | 3 SWAPs |
-| **QSVM (Proc B Noisy)** | 0.7700 ± 0.0833 | 0.7725 ± 0.0756 | 0.8360 ± 0.0948 | 0.0954 | 2 SWAPs |
-| **QSVM (Proc A Mitigated)** | **0.8000 ± 0.1161** | 0.7973 ± 0.1075 | 0.8400 ± 0.1155 | 0.0948 | 3 SWAPs |
-| **QSVM (Proc B Mitigated)** | **0.7900 ± 0.1194** | 0.7921 ± 0.1157 | 0.8460 ± 0.1074 | 0.0954 | 2 SWAPs |
-| **Classical SVM (RBF)** | **1.0000 ± 0.0000** | 1.0000 ± 0.0000 | 1.0000 ± 0.0000 | N/A | 0 |
-| **Classical SVM (Poly)** | 0.9700 ± 0.0340 | 0.9694 ± 0.0348 | 0.9780 ± 0.0544 | N/A | 0 |
+The JSON's noise assumptions describe the design. The Task B benchmark itself always uses the organizer's QFF2026-v2 noise model: 1% single-qubit depolarizing error, 5% two-qubit depolarizing error, and 2% readout error. Task B has no measurement, so readout error does not enter its fidelity calculation.
 
----
+| Official QFT-3 measurement | Result |
+|---|---:|
+| Depth before transpilation | 6 |
+| Depth after transpilation | 18 |
+| Two-qubit gate count | 9 |
+| Routing SWAP overhead | **0** |
+| Ideal fidelity | 1.000000 |
+| Noisy fidelity | **0.668377** |
 
-##  Mandatory AI Disclosure
+Zero routing SWAP overhead demonstrates that this topology embeds the benchmark circuit without extra routing SWAPs. The noisy fidelity shows that the benchmark still accumulates gate noise; this result does not establish classifier accuracy or prove that the topology is optimal.
 
-In accordance with Qiskit Fall Fest 2026 guidelines, we disclose that generative AI coding assistants (including Antigravity CLI and LLM pair programming agents) were utilized during this project for exploratory scaffolding, syntax linting, boilerplate generation, and verification script automation. All conceptual hardware architectures, topological co-design methodologies, benchmark interpretations, and final code validations were reviewed, structured, and verified by the submitting team.
+## Task A: Bell-state fidelity
 
----
+Task A prepares |Phi+> = (|00> + |11>) / sqrt(2) using a Hadamard and CNOT, then measures XX, YY, and ZZ in separate circuits. Each basis uses exactly 8,192 shots. The official task_a_bell() implementation imports the organizer noise model and transpiles to its fully-noised basis.
 
-## Phase 2 Submission — Official PS-Q2 QML Kit (v3)
+For each Pauli product P, the correlation is computed from measurement parity:
 
-The Phase 1 materials above are retained. The Phase 2 submission uses the official QFF2026 QML kit v3 assets in `benchmark/`, `noise_model/`, `schemas/`, `tools/`, and `data/q2/`. The official requirements are kept unchanged in `qml-requirements.txt`; the existing `requirements.txt` remains for reproducing the Phase 1 workflow.
+~~~~text
+<P> = (N_even - N_odd) / N
+~~~~
 
-### Dedicated environment and commands
+The required Bell fidelity is:
 
-Use Python 3.11, 3.12, or 3.13 and a separate environment for the QML track. On Windows PowerShell, with Python 3.12 available:
+~~~~text
+F = (1 + <XX> - <YY> + <ZZ>) / 4
+~~~~
 
-```powershell
-python3 -m venv qml-env
+| Condition | &lt;XX&gt; ± SE | &lt;YY&gt; ± SE | &lt;ZZ&gt; ± SE | Fidelity ± SE |
+|---|---:|---:|---:|---:|
+| Ideal | 1.0000 ± 0.0000 | −1.0000 ± 0.0000 | 1.0000 ± 0.0000 | **1.0000 ± 0.0000** |
+| QFF2026-v2 noisy | 0.8191 ± 0.0063 | −0.8279 ± 0.0062 | 0.8735 ± 0.0054 | **0.8801 ± 0.0026** |
+
+The noisy correlations are reduced by gate and readout errors. The values are estimates from the organizer's fixed simulator model and shot count, not experimental hardware measurements. P(00) + P(11) is a population measure and is not used as the fidelity.
+
+## Reproduce the Phase 2 submission
+
+Use Python 3.11, 3.12, or 3.13 and install the dedicated QML-track pins from **qml-requirements.txt**. Do not use the Phase 1 **requirements.txt** for this workflow.
+
+### Windows PowerShell
+
+~~~~powershell
+py -3.12 -m venv qml-env
 .\qml-env\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -r qml-requirements.txt
-python noise_model\benchmark_noise_model.py
-python benchmark\qff_qml_benchmark.py processor_d_config.json
-python tools\validate_predictions.py q2 predictions_q2.csv
+python -m pip install -r qml-requirements.txt
+~~~~
+
+### Linux or WSL
+
+~~~~bash
+python3 -m venv qml-env
+source qml-env/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r qml-requirements.txt
+~~~~
+
+### Run the checks and notebook
+
+~~~~bash
+python noise_model/benchmark_noise_model.py
+python benchmark/qff_qml_benchmark.py processor_d_config.json
+python tools/validate_predictions.py q2 predictions_q2.csv
 python -m nbconvert --to notebook --execute solution.ipynb --inplace
 pip freeze > pip_freeze.txt
-```
+~~~~
 
-`solution.ipynb` runs Task A, the official Processor D Task B benchmark, the PS-Q2 workflow, and writes `predictions_q2.csv`. Q2 supplies no validation partition: all model selection uses stratified cross-validation on a subset of the official training file. Scalers and PCA are fit on each training fold, then refit on the final training subset. The unlabeled test features are used only to create predictions; no test labels are present or used.
+The expected Processor D output is saved in **results/phase2/processor_d_benchmark.txt**; the Bell output is in **results/phase2/task_a_results.json**; PS-Q2 metrics are in **results/phase2/q2_metrics.json**. The official prediction validator checks the format and IDs in **predictions_q2.csv**.
 
-The checked-in Processor D design is a six-qubit custom topology retaining the Phase 1 K4 core and connected ancillae. Its benchmark results are the official QFT-3 output in `processor_d_config.json`; the raw command output is saved in `results/phase2/processor_d_benchmark.txt`. Task A measurements are saved in `results/phase2/task_a_results.json`; PS-Q2 cross-validation measurements and resource counts are saved in `results/phase2/q2_metrics.json`. The detailed Phase 2 analysis is in `results.md`.
+## Reproducibility and limitations
 
-### QML environment package freeze
+- Random seed and transpiler seed: 42.
+- The PS-Q2 balanced-accuracy results are cross-validation estimates, not test-set measurements.
+- Only 200 of the 800 labeled training rows are used for quantum model selection and final fitting; conclusions may vary with the subset and folds.
+- The classical baseline keeps six input features while the quantum model reduces them to four components.
+- The noisy Q2 density-matrix kernel is a normalized Hilbert–Schmidt overlap, not a shot-based compute-uncompute kernel; readout noise therefore does not enter that classifier calculation.
+- The current results do not show a quantum classification advantage. A successful Processor D QFT-3 benchmark is a topology result, not evidence of classifier superiority.
+- Timing is hardware-dependent.
 
-The `pip freeze` output from the executed Python 3.12.15 environment is saved in [`pip_freeze.txt`](./pip_freeze.txt) and reproduced here:
+The complete recorded environment freeze from the executed Python 3.12.15 environment follows.
 
-```text
+~~~~text
 annotated-types==0.8.0
 anyio==4.15.1
 appdirs==1.4.4
@@ -289,4 +295,4 @@ webcolors==25.10.0
 webencodings==0.6.1
 websocket-client==1.9.2
 wheel==0.48.0
-```
+~~~~
