@@ -218,6 +218,47 @@ class Q2ArtifactTests(unittest.TestCase):
         self.assertLessEqual({row[1] for row in predictions}, {"A", "B"})
         self.assertTrue({row[1] for row in predictions})
 
+    def test_generated_metrics_match_full_training_artifacts(self) -> None:
+        metrics = json.loads(
+            (ROOT / "results" / "phase2" / "q2_metrics.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(metrics["dataset"]["training_rows_used"], 800)
+        self.assertEqual(len(metrics["dataset"]["features_used_for_reduction"]), 50)
+        self.assertEqual(metrics["dataset"]["pca_components"], 6)
+        self.assertFalse(metrics["dataset"]["test_labels_used"])
+        self.assertEqual(metrics["quantum_kernel"]["noise_model_version"], "QFF2026-v2")
+        self.assertEqual(metrics["quantum_kernel"]["qubits"], 6)
+        self.assertEqual(metrics["quantum_kernel"]["routing_added_two_qubit_gates"], 0)
+
+        uncertainty = metrics["model_selection"]["selected_model_uncertainty"]
+        for model in ("quantum_ideal", "quantum_noisy", "classical_rbf"):
+            scores = uncertainty[model]["fold_scores"]
+            self.assertEqual(len(scores), 5)
+            self.assertTrue(all(0.0 <= score <= 1.0 for score in scores))
+            self.assertAlmostEqual(uncertainty[model]["mean"], sum(scores) / 5)
+        self.assertGreater(
+            metrics["model_selection"]["balanced_accuracy_cv"]["quantum_noisy"],
+            0.654,
+            "the final noisy quantum model regressed below the organizer baseline",
+        )
+
+        _, prediction_rows = read_csv(PREDICTIONS_PATH)
+        self.assertEqual(
+            Counter(row[1] for row in prediction_rows),
+            Counter(metrics["final_model"]["prediction_class_counts"]),
+        )
+        state_counts = metrics["resource_cost"][
+            "state_preparation_circuit_evaluations"
+        ]
+        self.assertEqual(
+            state_counts["total"],
+            state_counts["cv_ideal"]
+            + state_counts["cv_noisy"]
+            + state_counts["final_noisy_train_and_test"],
+        )
+
 
 class ProcessorDTests(unittest.TestCase):
     def test_schema_saved_results_and_official_benchmark_agree(self) -> None:
@@ -239,6 +280,24 @@ class ProcessorDTests(unittest.TestCase):
         json_start = transcript.find("{")
         self.assertNotEqual(json_start, -1, "saved Processor D benchmark has no JSON")
         self.assertEqual(json.loads(transcript[json_start:]), measured_results)
+
+    def test_q2_feature_map_uses_bidirectional_physical_cycle(self) -> None:
+        model = load_module("q2_solution_submission_test", ROOT / "q2_solution.py")
+        config = json.loads(
+            (ROOT / "processor_d_config.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(model.PHYSICAL_LAYOUT, (4, 0, 2, 5, 1, 3))
+        directed_edges = {tuple(edge) for edge in config["coupling_map"]}
+        cycle = (*model.PHYSICAL_LAYOUT, model.PHYSICAL_LAYOUT[0])
+        for first, second in zip(cycle[:-1], cycle[1:], strict=True):
+            self.assertIn((first, second), directed_edges)
+            self.assertIn((second, first), directed_edges)
+
+        compiled, _ = model._compiled_feature_map()
+        two_qubit_gates = sum(
+            instruction.operation.num_qubits == 2 for instruction in compiled.data
+        )
+        self.assertEqual(two_qubit_gates, 2 * len(model.RING_EDGES))
 
 
 class NotebookTests(unittest.TestCase):
@@ -346,9 +405,12 @@ class StaticLeakageGuardTests(unittest.TestCase):
                 "all opened paths must be declared module constants",
             )
             path_name = node.func.value.id
-            self.assertIn(path_name, {"TRAIN_PATH", "TEST_PATH", "PREDICTIONS_PATH"})
+            self.assertIn(
+                path_name,
+                {"TRAIN_PATH", "TEST_PATH", "PROCESSOR_PATH", "temporary_path"},
+            )
             opened_paths[path_name] += 1
-            if path_name == "PREDICTIONS_PATH":
+            if path_name == "temporary_path":
                 self.assertTrue(node.args, "predictions must be opened explicitly for writing")
                 self.assertIsInstance(node.args[0], ast.Constant)
                 self.assertEqual(node.args[0].value, "w")
@@ -356,31 +418,46 @@ class StaticLeakageGuardTests(unittest.TestCase):
                 self.assertFalse(node.args, f"{path_name} must only be opened for reading")
         self.assertEqual(
             opened_paths,
-            Counter({"TRAIN_PATH": 1, "TEST_PATH": 1, "PREDICTIONS_PATH": 1}),
+            Counter(
+                {
+                    "TRAIN_PATH": 1,
+                    "TEST_PATH": 1,
+                    "PROCESSOR_PATH": 1,
+                    "temporary_path": 1,
+                }
+            ),
         )
 
     def test_preprocessing_statistics_are_fit_on_training_data(self) -> None:
-        standardized = function_node(self.tree, "_fit_standardized")
-        statistic_receivers = []
-        for node in ast.walk(standardized):
-            if (
-                isinstance(node, ast.Call)
-                and isinstance(node.func, ast.Attribute)
-                and node.func.attr in {"mean", "std"}
-            ):
-                statistic_receivers.append(ast.unparse(node.func.value))
-        self.assertEqual(statistic_receivers, ["train_signal", "train_signal"])
-
-        transformed = function_node(self.tree, "_fit_transform")
-        decompositions = [
+        preprocessing = function_node(self.tree, "_fit_fold_preprocessing")
+        fitted_transforms = [
             node
-            for node in ast.walk(transformed)
+            for node in ast.walk(preprocessing)
             if isinstance(node, ast.Call)
             and isinstance(node.func, ast.Attribute)
-            and node.func.attr == "svd"
+            and node.func.attr == "fit_transform"
         ]
-        self.assertEqual(len(decompositions), 1)
-        self.assertEqual(ast.unparse(decompositions[0].args[0]), "centered_train")
+        self.assertEqual(
+            {
+                (ast.unparse(call.func.value), ast.unparse(call.args[0]))
+                for call in fitted_transforms
+            },
+            {("scaler", "x_train"), ("pca", "train_scaled")},
+        )
+        applied_transforms = [
+            node
+            for node in ast.walk(preprocessing)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "transform"
+        ]
+        self.assertEqual(
+            {
+                (ast.unparse(call.func.value), ast.unparse(call.args[0]))
+                for call in applied_transforms
+            },
+            {("scaler", "x_other"), ("pca", "other_scaled")},
+        )
 
     def test_model_selection_and_fitting_use_training_labels_only(self) -> None:
         experiment = function_node(self.tree, "run_experiment")
@@ -391,12 +468,24 @@ class StaticLeakageGuardTests(unittest.TestCase):
             ["x_train", "y_train"],
         )
 
-        fit_calls = calls_named(self.tree, "_fit_kernel_svm")
+        fit_calls = [
+            node
+            for node in ast.walk(self.tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "fit"
+        ]
         self.assertTrue(fit_calls)
         self.assertEqual(
             {ast.unparse(call.args[1]) for call in fit_calls},
             {"y_train"},
             "all SVM fits must use fold/final training labels, never test labels",
+        )
+        prediction_calls = calls_named(self.tree, "_precomputed_predictions")
+        self.assertTrue(prediction_calls)
+        self.assertEqual(
+            {ast.unparse(call.args[2]) for call in prediction_calls},
+            {"y_train"},
         )
 
 

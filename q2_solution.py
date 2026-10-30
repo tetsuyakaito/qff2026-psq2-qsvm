@@ -16,6 +16,7 @@ import numpy as np
 from qiskit import QuantumCircuit, transpile
 from qiskit.circuit import Parameter, ParameterVector
 from qiskit.quantum_info import Statevector
+from qiskit.transpiler import CouplingMap
 from qiskit_aer import AerSimulator
 from sklearn.decomposition import PCA
 from sklearn.metrics import balanced_accuracy_score
@@ -36,6 +37,7 @@ TRAIN_PATH = ROOT / "data" / "q2" / "hd_data_train.csv"
 TEST_PATH = ROOT / "data" / "q2" / "hd_data_test_features.csv"
 PREDICTIONS_PATH = ROOT / "predictions_q2.csv"
 METRICS_PATH = ROOT / "results" / "phase2" / "q2_metrics.json"
+PROCESSOR_PATH = ROOT / "processor_d_config.json"
 
 N_QUBITS = 6
 N_PCA_FEATURES = 6
@@ -51,6 +53,9 @@ LABELS = {"A": 0, "B": 1}
 # This order executes disjoint ring edges together where possible.  The edge
 # set is exactly the logical six-cycle 0-1-2-3-4-5-0.
 RING_EDGES = ((0, 1), (2, 3), (4, 5), (1, 2), (3, 4), (5, 0))
+# Logical qubits 0..5 map onto this zero-SWAP cycle in Processor D:
+# 4-0-2-5-1-3-4. Every listed physical edge is bidirectional in the config.
+PHYSICAL_LAYOUT = (4, 0, 2, 5, 1, 3)
 SIMULATION_BATCH_SIZE = 100
 T_975_DF4 = 2.7764451051977987
 
@@ -83,14 +88,40 @@ def _feature_map(angles: Sequence[object]) -> QuantumCircuit:
 
 
 def _compiled_feature_map() -> tuple[QuantumCircuit, tuple[Parameter, ...]]:
-    """Compile one parameterized template so thousands of binds stay cheap."""
+    """Compile one parameterized template onto Processor D's physical cycle."""
 
     global _COMPILED_FEATURE_MAP, _FEATURE_PARAMETERS
     if _COMPILED_FEATURE_MAP is None:
+        with PROCESSOR_PATH.open(encoding="utf-8") as file:
+            processor = json.load(file)
+        if processor.get("n_qubits") != N_QUBITS:
+            raise ValueError("Processor D must have exactly six qubits for PS-Q2.")
+        coupling_pairs = [
+            (int(control), int(target))
+            for control, target in processor.get("coupling_map", [])
+        ]
+        directed_edges = set(coupling_pairs)
+        physical_ring = {
+            (PHYSICAL_LAYOUT[first], PHYSICAL_LAYOUT[second])
+            for first, second in RING_EDGES
+        }
+        missing_directions = sorted(
+            edge
+            for control, target in physical_ring
+            for edge in ((control, target), (target, control))
+            if edge not in directed_edges
+        )
+        if missing_directions:
+            raise ValueError(
+                "Processor D is missing directed physical-cycle links: "
+                f"{missing_directions}"
+            )
         parameters = ParameterVector("theta", N_QUBITS)
         compiled = transpile(
             _feature_map(parameters),
             basis_gates=DEFAULT_BASIS,
+            coupling_map=CouplingMap([list(edge) for edge in coupling_pairs]),
+            initial_layout=list(PHYSICAL_LAYOUT),
             optimization_level=1,
             seed_transpiler=SEED,
         )
@@ -603,6 +634,8 @@ def run_experiment() -> dict:
             "zz_angle_formula": "phi_ij = 0.1 * theta_i * theta_j",
             "zz_beta": ZZ_BETA,
             "logical_ring_edges": [list(edge) for edge in RING_EDGES],
+            "processor_d_physical_layout": list(PHYSICAL_LAYOUT),
+            "processor_d_physical_cycle": [*PHYSICAL_LAYOUT, PHYSICAL_LAYOUT[0]],
             "entangling_pairs": len(RING_EDGES),
             "logical_feature_map_depth": int(_feature_map(np.zeros(N_QUBITS)).depth()),
             "compiled_feature_map_depth": int(compiled_circuit.depth()),
@@ -611,6 +644,13 @@ def run_experiment() -> dict:
                     instruction.operation.num_qubits == 2
                     for instruction in compiled_circuit.data
                 )
+            ),
+            "routing_added_two_qubit_gates": int(
+                sum(
+                    instruction.operation.num_qubits == 2
+                    for instruction in compiled_circuit.data
+                )
+                - 2 * len(RING_EDGES)
             ),
             "trainable_quantum_parameters": 0,
             "data_bound_parameters_per_circuit": N_QUBITS,

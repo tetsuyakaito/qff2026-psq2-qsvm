@@ -257,14 +257,32 @@
         0
       ]
     ],
+    "processor_d_physical_layout": [
+      4,
+      0,
+      2,
+      5,
+      1,
+      3
+    ],
+    "processor_d_physical_cycle": [
+      4,
+      0,
+      2,
+      5,
+      1,
+      3,
+      4
+    ],
     "entangling_pairs": 6,
     "logical_feature_map_depth": 8,
     "compiled_feature_map_depth": 9,
     "compiled_two_qubit_gate_count": 12,
+    "routing_added_two_qubit_gates": 0,
     "trainable_quantum_parameters": 0,
     "data_bound_parameters_per_circuit": 6,
-    "mean_fold_ideal_noisy_kernel_absolute_difference": 0.07334249076493707,
-    "mean_fold_centered_ideal_noisy_kernel_alignment": 0.9975709861440831,
+    "mean_fold_ideal_noisy_kernel_absolute_difference": 0.07334249076493701,
+    "mean_fold_centered_ideal_noisy_kernel_alignment": 0.9975709861440833,
     "kernel_definition": "Ideal squared state overlap; noisy normalized Hilbert-Schmidt overlap Tr(rho_i rho_j)/sqrt(Tr(rho_i^2)Tr(rho_j^2)).",
     "noise_model_version": "QFF2026-v2",
     "fully_noised_basis": [
@@ -315,7 +333,7 @@
     "trainable_quantum_parameters": 0,
     "compiled_feature_map_depth": 9,
     "compiled_two_qubit_gate_count_per_state_preparation": 12,
-    "training_wall_time_seconds": 17.667,
+    "training_wall_time_seconds": 14.781,
     "transpiler_seed": 42
   },
   "prediction_file": "predictions_q2.csv",
@@ -335,9 +353,9 @@
           "B": 82
         },
         "pca_explained_variance_ratio_sum": 0.25526573652874696,
-        "centered_ideal_noisy_kernel_alignment": 0.9976042772195628,
-        "ideal_noisy_kernel_mean_absolute_difference": 0.07340549396888578,
-        "ideal_kernel_off_diagonal_standard_deviation": 0.1870989123291443,
+        "centered_ideal_noisy_kernel_alignment": 0.9976042772195632,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.07340549396888572,
+        "ideal_kernel_off_diagonal_standard_deviation": 0.18709891232914427,
         "noisy_kernel_off_diagonal_standard_deviation": 0.17851668473317264
       },
       {
@@ -353,10 +371,10 @@
           "B": 83
         },
         "pca_explained_variance_ratio_sum": 0.25728068851377783,
-        "centered_ideal_noisy_kernel_alignment": 0.9975940243922824,
-        "ideal_noisy_kernel_mean_absolute_difference": 0.07332923486226019,
+        "centered_ideal_noisy_kernel_alignment": 0.9975940243922822,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.07332923486226008,
         "ideal_kernel_off_diagonal_standard_deviation": 0.18752125278141635,
-        "noisy_kernel_off_diagonal_standard_deviation": 0.17889434737034574
+        "noisy_kernel_off_diagonal_standard_deviation": 0.1788943473703457
       },
       {
         "fold": 3,
@@ -371,8 +389,8 @@
           "B": 83
         },
         "pca_explained_variance_ratio_sum": 0.25301380758428954,
-        "centered_ideal_noisy_kernel_alignment": 0.9975604773719136,
-        "ideal_noisy_kernel_mean_absolute_difference": 0.07332688427208552,
+        "centered_ideal_noisy_kernel_alignment": 0.9975604773719134,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.07332688427208547,
         "ideal_kernel_off_diagonal_standard_deviation": 0.18728542331786865,
         "noisy_kernel_off_diagonal_standard_deviation": 0.178829096520619
       },
@@ -390,9 +408,9 @@
         },
         "pca_explained_variance_ratio_sum": 0.25830660595816546,
         "centered_ideal_noisy_kernel_alignment": 0.9975254577980363,
-        "ideal_noisy_kernel_mean_absolute_difference": 0.07333291143317038,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.07333291143317033,
         "ideal_kernel_off_diagonal_standard_deviation": 0.18793332213617772,
-        "noisy_kernel_off_diagonal_standard_deviation": 0.1795373362701218
+        "noisy_kernel_off_diagonal_standard_deviation": 0.17953733627012178
       },
       {
         "fold": 5,
@@ -407,10 +425,10 @@
           "B": 83
         },
         "pca_explained_variance_ratio_sum": 0.2563505443004275,
-        "centered_ideal_noisy_kernel_alignment": 0.9975706939386206,
+        "centered_ideal_noisy_kernel_alignment": 0.9975706939386212,
         "ideal_noisy_kernel_mean_absolute_difference": 0.0733179292882835,
-        "ideal_kernel_off_diagonal_standard_deviation": 0.18753289797047126,
-        "noisy_kernel_off_diagonal_standard_deviation": 0.17897082049105348
+        "ideal_kernel_off_diagonal_standard_deviation": 0.1875328979704713,
+        "noisy_kernel_off_diagonal_standard_deviation": 0.1789708204910535
       }
     ],
     "cv_fold_scores": {
