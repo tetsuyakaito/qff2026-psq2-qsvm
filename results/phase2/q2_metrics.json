@@ -1,13 +1,15 @@
 {
   "dataset": {
     "training_rows_available": 800,
-    "training_subset_rows": 200,
-    "training_subset_class_counts": {
-      "A": 97,
-      "B": 103
+    "training_rows_used": 800,
+    "training_subset_rows": 800,
+    "training_class_counts": {
+      "A": 386,
+      "B": 414
     },
     "test_rows": 200,
     "test_ids_preserved": true,
+    "test_labels_available": false,
     "test_labels_used": false,
     "features_used_for_reduction": [
       "x01",
@@ -15,165 +17,761 @@
       "x03",
       "x04",
       "x05",
-      "x06"
+      "x06",
+      "x07",
+      "x08",
+      "x09",
+      "x10",
+      "x11",
+      "x12",
+      "x13",
+      "x14",
+      "x15",
+      "x16",
+      "x17",
+      "x18",
+      "x19",
+      "x20",
+      "x21",
+      "x22",
+      "x23",
+      "x24",
+      "x25",
+      "x26",
+      "x27",
+      "x28",
+      "x29",
+      "x30",
+      "x31",
+      "x32",
+      "x33",
+      "x34",
+      "x35",
+      "x36",
+      "x37",
+      "x38",
+      "x39",
+      "x40",
+      "x41",
+      "x42",
+      "x43",
+      "x44",
+      "x45",
+      "x46",
+      "x47",
+      "x48",
+      "x49",
+      "x50"
     ],
-    "pca_components": 4,
+    "pca_components": 6,
     "classical_baseline_features": [
       "x01",
       "x02",
       "x03",
       "x04",
       "x05",
-      "x06"
+      "x06",
+      "x07",
+      "x08",
+      "x09",
+      "x10",
+      "x11",
+      "x12",
+      "x13",
+      "x14",
+      "x15",
+      "x16",
+      "x17",
+      "x18",
+      "x19",
+      "x20",
+      "x21",
+      "x22",
+      "x23",
+      "x24",
+      "x25",
+      "x26",
+      "x27",
+      "x28",
+      "x29",
+      "x30",
+      "x31",
+      "x32",
+      "x33",
+      "x34",
+      "x35",
+      "x36",
+      "x37",
+      "x38",
+      "x39",
+      "x40",
+      "x41",
+      "x42",
+      "x43",
+      "x44",
+      "x45",
+      "x46",
+      "x47",
+      "x48",
+      "x49",
+      "x50"
     ]
   },
   "model_selection": {
-    "method": "3-fold stratified cross-validation on training subset only",
-    "quantum_selected_C": 100.0,
+    "method": "5-fold shuffled stratified cross-validation on all official training rows only",
+    "shared_fold_splits_for_all_models": true,
+    "fold_preprocessing_fit_on_training_partition_only": true,
+    "random_seed": 42,
+    "quantum_C_grid": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "classical_C_grid": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "classical_gamma_grid": [
+      0.01,
+      0.02,
+      0.05
+    ],
+    "ideal_quantum_selected_C": 1.0,
+    "quantum_selected_C": 1.0,
     "classical_selected_parameters": {
       "kernel": "RBF",
       "C": 1.0,
-      "gamma": 0.3
+      "gamma": 0.01
     },
     "balanced_accuracy_cv": {
-      "quantum_ideal": 0.5148146379764027,
-      "quantum_noisy": 0.509912677192089,
-      "classical_rbf": 0.607845789831084
+      "quantum_ideal": 0.729008424233226,
+      "quantum_noisy": 0.7266320857123091,
+      "classical_rbf": 0.7273635806841801
+    },
+    "selected_model_uncertainty": {
+      "quantum_ideal": {
+        "fold_scores": [
+          0.7071607254534085,
+          0.7060710373963386,
+          0.7631043655140041,
+          0.7185886402753873,
+          0.7501173525269911
+        ],
+        "mean": 0.729008424233226,
+        "sample_standard_deviation": 0.02607746929889992,
+        "standard_error": 0.0116621988067008,
+        "confidence_interval_95": [
+          0.6966289694405179,
+          0.7613878790259341
+        ]
+      },
+      "quantum_noisy": {
+        "fold_scores": [
+          0.6943402126328956,
+          0.7060710373963386,
+          0.7631043655140041,
+          0.725551556876858,
+          0.7440932561414489
+        ],
+        "mean": 0.7266320857123091,
+        "sample_standard_deviation": 0.027846943207834596,
+        "standard_error": 0.012453531595658842,
+        "confidence_interval_95": [
+          0.6920555388711159,
+          0.7612086325535022
+        ]
+      },
+      "classical_rbf": {
+        "fold_scores": [
+          0.7193558474046279,
+          0.7561414489125333,
+          0.6926146143013613,
+          0.7450320763573776,
+          0.7236739164450008
+        ],
+        "mean": 0.7273635806841801,
+        "sample_standard_deviation": 0.024625035625714622,
+        "standard_error": 0.011012650721490392,
+        "confidence_interval_95": [
+          0.6967875604932451,
+          0.757939600875115
+        ]
+      },
+      "method": "Descriptive 95% t interval: mean +/- t(0.975, df=4) times fold-score sample SD/sqrt(5); CV folds are not independent test sets."
     },
     "quantum_cv_scores_by_C": {
       "ideal": {
-        "0.01": 0.5,
-        "0.1": 0.5,
-        "1.0": 0.4736562049062049,
-        "10.0": 0.5014827900857313,
-        "100.0": 0.5148146379764027
+        "0.1": 0.7167597315995788,
+        "1.0": 0.729008424233226,
+        "10.0": 0.7214039804842038
       },
       "noisy": {
-        "0.01": 0.5,
-        "0.1": 0.5,
-        "1.0": 0.48330309396485865,
-        "10.0": 0.4965545687972159,
-        "100.0": 0.509912677192089
+        "0.1": 0.7141770219201898,
+        "1.0": 0.7266320857123091,
+        "10.0": 0.7164741713375273
       }
     },
     "classical_cv_scores_by_parameters": {
-      "C=0.01,gamma=0.01": 0.5,
-      "C=0.01,gamma=0.03": 0.5,
-      "C=0.01,gamma=0.1": 0.5,
-      "C=0.01,gamma=0.3": 0.5,
-      "C=0.01,gamma=1.0": 0.5,
-      "C=0.01,gamma=3.0": 0.5,
-      "C=0.01,gamma=10.0": 0.5,
-      "C=0.1,gamma=0.01": 0.5,
-      "C=0.1,gamma=0.03": 0.5,
-      "C=0.1,gamma=0.1": 0.5,
-      "C=0.1,gamma=0.3": 0.5,
-      "C=0.1,gamma=1.0": 0.5,
-      "C=0.1,gamma=3.0": 0.5,
-      "C=0.1,gamma=10.0": 0.5,
-      "C=1.0,gamma=0.01": 0.5264525507172565,
-      "C=1.0,gamma=0.03": 0.5797839211442153,
-      "C=1.0,gamma=0.1": 0.5509053242509124,
-      "C=1.0,gamma=0.3": 0.607845789831084,
-      "C=1.0,gamma=1.0": 0.5716179653679654,
-      "C=1.0,gamma=3.0": 0.5324306616586029,
-      "C=1.0,gamma=10.0": 0.510705266955267,
-      "C=10.0,gamma=0.01": 0.5908040488922842,
-      "C=10.0,gamma=0.03": 0.5372501273236567,
-      "C=10.0,gamma=0.1": 0.5353230307274425,
-      "C=10.0,gamma=0.3": 0.530457410236822,
-      "C=10.0,gamma=1.0": 0.5677836664969018,
-      "C=10.0,gamma=3.0": 0.5333404952890247,
-      "C=10.0,gamma=10.0": 0.5159136002886003,
-      "C=100.0,gamma=0.01": 0.5323396782955606,
-      "C=100.0,gamma=0.03": 0.50958853238265,
-      "C=100.0,gamma=0.1": 0.5394729861641626,
-      "C=100.0,gamma=0.3": 0.49519830659536535,
-      "C=100.0,gamma=1.0": 0.5677836664969018,
-      "C=100.0,gamma=3.0": 0.5333404952890247,
-      "C=100.0,gamma=10.0": 0.5159136002886003
+      "C=0.1,gamma=0.01": 0.7080908757223773,
+      "C=0.1,gamma=0.02": 0.7075257732765814,
+      "C=0.1,gamma=0.05": 0.5,
+      "C=1.0,gamma=0.01": 0.7273635806841801,
+      "C=1.0,gamma=0.02": 0.7185415818386727,
+      "C=1.0,gamma=0.05": 0.7132649699208619,
+      "C=10.0,gamma=0.01": 0.6957391760947447,
+      "C=10.0,gamma=0.02": 0.7158886514602059,
+      "C=10.0,gamma=0.05": 0.7068819954655983
     },
     "test_labels_used_for_selection": false
   },
   "quantum_kernel": {
-    "qubits": 4,
-    "feature_map": "H-RZ data encoding plus all-pairs ZZ interactions on K4",
+    "qubits": 6,
+    "feature_map": "H-RZ encoding with theta=1.2*tanh(PCA_component/2), plus weak ring RZZ interactions implemented as CX-RZ-CX",
+    "angle_formula": "theta_i = 1.2 * tanh(component_i / 2)",
+    "zz_angle_formula": "phi_ij = 0.1 * theta_i * theta_j",
+    "zz_beta": 0.1,
+    "logical_ring_edges": [
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        5,
+        0
+      ]
+    ],
     "entangling_pairs": 6,
-    "compiled_feature_map_depth": 17,
+    "logical_feature_map_depth": 8,
+    "compiled_feature_map_depth": 9,
     "compiled_two_qubit_gate_count": 12,
-    "ideal_noisy_kernel_mean_absolute_difference": 0.11912929142053383,
-    "ideal_noisy_training_kernel_alignment": 0.9894587181514606,
-    "ideal_training_kernel_off_diagonal_std": 0.12197832316036968,
-    "noisy_training_kernel_off_diagonal_std": 0.10880515563280445,
+    "trainable_quantum_parameters": 0,
+    "data_bound_parameters_per_circuit": 6,
+    "mean_fold_ideal_noisy_kernel_absolute_difference": 0.07334249076493707,
+    "mean_fold_centered_ideal_noisy_kernel_alignment": 0.9975709861440831,
     "kernel_definition": "Ideal squared state overlap; noisy normalized Hilbert-Schmidt overlap Tr(rho_i rho_j)/sqrt(Tr(rho_i^2)Tr(rho_j^2)).",
-    "noise_model_version": "QFF2026-v2"
+    "noise_model_version": "QFF2026-v2",
+    "fully_noised_basis": [
+      "rx",
+      "ry",
+      "rz",
+      "cx"
+    ],
+    "simulation": "Exact statevector (ideal) and density matrix (noisy), without measurement shots; readout noise therefore does not enter."
+  },
+  "final_model": {
+    "model": "Noisy QFF2026-v2 precomputed-kernel SVC",
+    "training_rows": 800,
+    "selected_C": 1.0,
+    "support_vectors": 525,
+    "support_vectors_by_class": {
+      "A": 253,
+      "B": 272
+    },
+    "pca_explained_variance_ratio_sum": 0.2538057284429931,
+    "prediction_class_counts": {
+      "A": 102,
+      "B": 98
+    },
+    "test_labels_used": false
   },
   "resource_cost": {
-    "folds": 3,
-    "state_preparation_circuit_evaluations": 2000,
-    "unique_symmetric_kernel_values": 281000,
-    "test_prediction_model": "Noisy QFF2026-v2 kernel",
-    "training_wall_time_seconds": 98.371,
+    "folds": 5,
+    "state_preparation_circuit_evaluations": {
+      "cv_ideal": 4000,
+      "cv_noisy": 4000,
+      "final_noisy_train_and_test": 1000,
+      "total": 9000
+    },
+    "unique_quantum_pairwise_kernel_entries": {
+      "cv_ideal": 1537600,
+      "cv_noisy": 1537600,
+      "final_noisy": 480400,
+      "total": 3555600
+    },
+    "quantum_kernel_matrix_cells_materialized": {
+      "cv_ideal": 2560000,
+      "cv_noisy": 2560000,
+      "final_noisy": 800000,
+      "total": 5920000
+    },
+    "accounting_note": "A state preparation produces one reusable state. Pairwise overlaps are classical post-processing of those states; C-grid SVM fits reuse each kernel and add no circuit evaluations. Matrix-cell counts include both halves of stored symmetric training matrices; unique-entry counts do not.",
+    "trainable_quantum_parameters": 0,
+    "compiled_feature_map_depth": 9,
+    "compiled_two_qubit_gate_count_per_state_preparation": 12,
+    "training_wall_time_seconds": 17.667,
     "transpiler_seed": 42
   },
   "prediction_file": "predictions_q2.csv",
   "prediction_rows": 200,
   "diagnostics": {
-    "mean_fold_centered_kernel_alignment": 0.9908186225101278,
+    "fold_details": [
+      {
+        "fold": 1,
+        "training_rows": 640,
+        "validation_rows": 160,
+        "training_class_counts": {
+          "A": 308,
+          "B": 332
+        },
+        "validation_class_counts": {
+          "A": 78,
+          "B": 82
+        },
+        "pca_explained_variance_ratio_sum": 0.25526573652874696,
+        "centered_ideal_noisy_kernel_alignment": 0.9976042772195628,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.07340549396888578,
+        "ideal_kernel_off_diagonal_standard_deviation": 0.1870989123291443,
+        "noisy_kernel_off_diagonal_standard_deviation": 0.17851668473317264
+      },
+      {
+        "fold": 2,
+        "training_rows": 640,
+        "validation_rows": 160,
+        "training_class_counts": {
+          "A": 309,
+          "B": 331
+        },
+        "validation_class_counts": {
+          "A": 77,
+          "B": 83
+        },
+        "pca_explained_variance_ratio_sum": 0.25728068851377783,
+        "centered_ideal_noisy_kernel_alignment": 0.9975940243922824,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.07332923486226019,
+        "ideal_kernel_off_diagonal_standard_deviation": 0.18752125278141635,
+        "noisy_kernel_off_diagonal_standard_deviation": 0.17889434737034574
+      },
+      {
+        "fold": 3,
+        "training_rows": 640,
+        "validation_rows": 160,
+        "training_class_counts": {
+          "A": 309,
+          "B": 331
+        },
+        "validation_class_counts": {
+          "A": 77,
+          "B": 83
+        },
+        "pca_explained_variance_ratio_sum": 0.25301380758428954,
+        "centered_ideal_noisy_kernel_alignment": 0.9975604773719136,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.07332688427208552,
+        "ideal_kernel_off_diagonal_standard_deviation": 0.18728542331786865,
+        "noisy_kernel_off_diagonal_standard_deviation": 0.178829096520619
+      },
+      {
+        "fold": 4,
+        "training_rows": 640,
+        "validation_rows": 160,
+        "training_class_counts": {
+          "A": 309,
+          "B": 331
+        },
+        "validation_class_counts": {
+          "A": 77,
+          "B": 83
+        },
+        "pca_explained_variance_ratio_sum": 0.25830660595816546,
+        "centered_ideal_noisy_kernel_alignment": 0.9975254577980363,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.07333291143317038,
+        "ideal_kernel_off_diagonal_standard_deviation": 0.18793332213617772,
+        "noisy_kernel_off_diagonal_standard_deviation": 0.1795373362701218
+      },
+      {
+        "fold": 5,
+        "training_rows": 640,
+        "validation_rows": 160,
+        "training_class_counts": {
+          "A": 309,
+          "B": 331
+        },
+        "validation_class_counts": {
+          "A": 77,
+          "B": 83
+        },
+        "pca_explained_variance_ratio_sum": 0.2563505443004275,
+        "centered_ideal_noisy_kernel_alignment": 0.9975706939386206,
+        "ideal_noisy_kernel_mean_absolute_difference": 0.0733179292882835,
+        "ideal_kernel_off_diagonal_standard_deviation": 0.18753289797047126,
+        "noisy_kernel_off_diagonal_standard_deviation": 0.17897082049105348
+      }
+    ],
     "cv_fold_scores": {
       "quantum_ideal": {
-        "0.01": [
-          0.5,
-          0.5,
-          0.5
-        ],
         "0.1": [
-          0.5,
-          0.5,
-          0.5
+          0.6885553470919324,
+          0.7135033641057738,
+          0.7315756532624003,
+          0.6879987482397121,
+          0.7621655452980755
         ],
         "1.0": [
-          0.5147186147186147,
-          0.4375,
-          0.46875
+          0.7071607254534085,
+          0.7060710373963386,
+          0.7631043655140041,
+          0.7185886402753873,
+          0.7501173525269911
         ],
         "10.0": [
-          0.5173160173160173,
-          0.5330882352941176,
-          0.4540441176470588
-        ],
-        "100.0": [
-          0.5021645021645021,
-          0.5441176470588236,
-          0.49816176470588236
+          0.7071607254534085,
+          0.6861211078078548,
+          0.745501486465342,
+          0.7375997496479425,
+          0.7306368330464716
         ]
       },
       "quantum_noisy": {
-        "0.01": [
-          0.5,
-          0.5,
-          0.5
-        ],
         "0.1": [
-          0.5,
-          0.5,
-          0.5
+          0.6946529080675422,
+          0.7014551713346895,
+          0.7375997496479425,
+          0.6879987482397121,
+          0.7491785323110625
         ],
         "1.0": [
-          0.4701298701298701,
-          0.5119485294117647,
-          0.4678308823529412
+          0.6943402126328956,
+          0.7060710373963386,
+          0.7631043655140041,
+          0.725551556876858,
+          0.7440932561414489
         ],
         "10.0": [
-          0.48874458874458876,
-          0.5477941176470589,
-          0.453125
-        ],
-        "100.0": [
-          0.5021645021645021,
-          0.5294117647058824,
-          0.49816176470588236
+          0.7135709818636649,
+          0.6930840244093256,
+          0.7394773900797997,
+          0.7120951337818808,
+          0.7241433265529651
         ]
+      },
+      "classical_rbf": {
+        "C=0.1,gamma=0.01": [
+          0.691213258286429,
+          0.7241433265529651,
+          0.666171178219371,
+          0.7241433265529651,
+          0.7347832890001564
+        ],
+        "C=0.1,gamma=0.02": [
+          0.7027829893683553,
+          0.7236739164450008,
+          0.6782193709904554,
+          0.6976998904709748,
+          0.7352526991081207
+        ],
+        "C=0.1,gamma=0.05": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "C=1.0,gamma=0.01": [
+          0.7193558474046279,
+          0.7561414489125333,
+          0.6926146143013613,
+          0.7450320763573776,
+          0.7236739164450008
+        ],
+        "C=1.0,gamma=0.02": [
+          0.700750469043152,
+          0.7375997496479425,
+          0.6861211078078548,
+          0.7635737756219685,
+          0.7046628070724457
+        ],
+        "C=1.0,gamma=0.05": [
+          0.7235772357723578,
+          0.7482397120951338,
+          0.6726646847128774,
+          0.7120951337818808,
+          0.7097480832420591
+        ],
+        "C=10.0,gamma=0.01": [
+          0.730925578486554,
+          0.663432952589579,
+          0.666171178219371,
+          0.7185886402753873,
+          0.699577530902832
+        ],
+        "C=10.0,gamma=0.02": [
+          0.7556285178236397,
+          0.7139727742137381,
+          0.6851822875919261,
+          0.7246127366609294,
+          0.7000469410107965
+        ],
+        "C=10.0,gamma=0.05": [
+          0.7171669793621014,
+          0.7487091222030982,
+          0.6657017681114066,
+          0.7056016272883743,
+          0.6972304803630105
+        ]
+      }
+    },
+    "cv_score_summaries_by_hyperparameter": {
+      "quantum_ideal": {
+        "0.1": {
+          "fold_scores": [
+            0.6885553470919324,
+            0.7135033641057738,
+            0.7315756532624003,
+            0.6879987482397121,
+            0.7621655452980755
+          ],
+          "mean": 0.7167597315995788,
+          "sample_standard_deviation": 0.03128292206171704,
+          "standard_error": 0.013990148052965433,
+          "confidence_interval_95": [
+            0.6779168535169304,
+            0.7556026096822273
+          ]
+        },
+        "1.0": {
+          "fold_scores": [
+            0.7071607254534085,
+            0.7060710373963386,
+            0.7631043655140041,
+            0.7185886402753873,
+            0.7501173525269911
+          ],
+          "mean": 0.729008424233226,
+          "sample_standard_deviation": 0.02607746929889992,
+          "standard_error": 0.0116621988067008,
+          "confidence_interval_95": [
+            0.6966289694405179,
+            0.7613878790259341
+          ]
+        },
+        "10.0": {
+          "fold_scores": [
+            0.7071607254534085,
+            0.6861211078078548,
+            0.745501486465342,
+            0.7375997496479425,
+            0.7306368330464716
+          ],
+          "mean": 0.7214039804842038,
+          "sample_standard_deviation": 0.024372062478996336,
+          "standard_error": 0.010899517690981568,
+          "confidence_interval_95": [
+            0.6911420679420612,
+            0.7516658930263465
+          ]
+        }
+      },
+      "quantum_noisy": {
+        "0.1": {
+          "fold_scores": [
+            0.6946529080675422,
+            0.7014551713346895,
+            0.7375997496479425,
+            0.6879987482397121,
+            0.7491785323110625
+          ],
+          "mean": 0.7141770219201898,
+          "sample_standard_deviation": 0.027395567254538348,
+          "standard_error": 0.012251670132663005,
+          "confidence_interval_95": [
+            0.6801609323498595,
+            0.7481931114905201
+          ]
+        },
+        "1.0": {
+          "fold_scores": [
+            0.6943402126328956,
+            0.7060710373963386,
+            0.7631043655140041,
+            0.725551556876858,
+            0.7440932561414489
+          ],
+          "mean": 0.7266320857123091,
+          "sample_standard_deviation": 0.027846943207834596,
+          "standard_error": 0.012453531595658842,
+          "confidence_interval_95": [
+            0.6920555388711159,
+            0.7612086325535022
+          ]
+        },
+        "10.0": {
+          "fold_scores": [
+            0.7135709818636649,
+            0.6930840244093256,
+            0.7394773900797997,
+            0.7120951337818808,
+            0.7241433265529651
+          ],
+          "mean": 0.7164741713375273,
+          "sample_standard_deviation": 0.017048955001561547,
+          "standard_error": 0.0076245244657653305,
+          "confidence_interval_95": [
+            0.6953050977050923,
+            0.7376432449699624
+          ]
+        }
+      },
+      "classical_rbf": {
+        "C=0.1,gamma=0.01": {
+          "fold_scores": [
+            0.691213258286429,
+            0.7241433265529651,
+            0.666171178219371,
+            0.7241433265529651,
+            0.7347832890001564
+          ],
+          "mean": 0.7080908757223773,
+          "sample_standard_deviation": 0.02859179205203137,
+          "standard_error": 0.012786638125376068,
+          "confidence_interval_95": [
+            0.6725894768872414,
+            0.7435922745575132
+          ]
+        },
+        "C=0.1,gamma=0.02": {
+          "fold_scores": [
+            0.7027829893683553,
+            0.7236739164450008,
+            0.6782193709904554,
+            0.6976998904709748,
+            0.7352526991081207
+          ],
+          "mean": 0.7075257732765814,
+          "sample_standard_deviation": 0.022402299719679174,
+          "standard_error": 0.010018613005105422,
+          "confidence_interval_95": [
+            0.6797096442376854,
+            0.7353419023154774
+          ]
+        },
+        "C=0.1,gamma=0.05": {
+          "fold_scores": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "mean": 0.5,
+          "sample_standard_deviation": 0.0,
+          "standard_error": 0.0,
+          "confidence_interval_95": [
+            0.5,
+            0.5
+          ]
+        },
+        "C=1.0,gamma=0.01": {
+          "fold_scores": [
+            0.7193558474046279,
+            0.7561414489125333,
+            0.6926146143013613,
+            0.7450320763573776,
+            0.7236739164450008
+          ],
+          "mean": 0.7273635806841801,
+          "sample_standard_deviation": 0.024625035625714622,
+          "standard_error": 0.011012650721490392,
+          "confidence_interval_95": [
+            0.6967875604932451,
+            0.757939600875115
+          ]
+        },
+        "C=1.0,gamma=0.02": {
+          "fold_scores": [
+            0.700750469043152,
+            0.7375997496479425,
+            0.6861211078078548,
+            0.7635737756219685,
+            0.7046628070724457
+          ],
+          "mean": 0.7185415818386727,
+          "sample_standard_deviation": 0.03142985625595561,
+          "standard_error": 0.014055859022272753,
+          "confidence_interval_95": [
+            0.6795162608569332,
+            0.7575669028204122
+          ]
+        },
+        "C=1.0,gamma=0.05": {
+          "fold_scores": [
+            0.7235772357723578,
+            0.7482397120951338,
+            0.6726646847128774,
+            0.7120951337818808,
+            0.7097480832420591
+          ],
+          "mean": 0.7132649699208619,
+          "sample_standard_deviation": 0.02734819731089242,
+          "standard_error": 0.01223048564984648,
+          "confidence_interval_95": [
+            0.6793076979041537,
+            0.74722224193757
+          ]
+        },
+        "C=10.0,gamma=0.01": {
+          "fold_scores": [
+            0.730925578486554,
+            0.663432952589579,
+            0.666171178219371,
+            0.7185886402753873,
+            0.699577530902832
+          ],
+          "mean": 0.6957391760947447,
+          "sample_standard_deviation": 0.030384504561442927,
+          "standard_error": 0.013588363532407763,
+          "confidence_interval_95": [
+            0.6580118306775429,
+            0.7334665215119465
+          ]
+        },
+        "C=10.0,gamma=0.02": {
+          "fold_scores": [
+            0.7556285178236397,
+            0.7139727742137381,
+            0.6851822875919261,
+            0.7246127366609294,
+            0.7000469410107965
+          ],
+          "mean": 0.7158886514602059,
+          "sample_standard_deviation": 0.026706168757286774,
+          "standard_error": 0.01194336175197486,
+          "confidence_interval_95": [
+            0.6827285631843286,
+            0.7490487397360831
+          ]
+        },
+        "C=10.0,gamma=0.05": {
+          "fold_scores": [
+            0.7171669793621014,
+            0.7487091222030982,
+            0.6657017681114066,
+            0.7056016272883743,
+            0.6972304803630105
+          ],
+          "mean": 0.7068819954655983,
+          "sample_standard_deviation": 0.030190609617287673,
+          "standard_error": 0.01350165107728283,
+          "confidence_interval_95": [
+            0.6693954024199877,
+            0.7443685885112088
+          ]
+        }
       }
     }
   }
