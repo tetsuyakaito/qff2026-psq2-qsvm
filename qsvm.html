@@ -173,14 +173,28 @@
       grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
       gap: 12px;
     }
-    .topology { width: 100%; max-width: 620px; display: block; margin: 8px auto 0; }
-    .topology .edge-extra { stroke: var(--quiet); stroke-width: 1.6; }
-    .topology .ring-edge { stroke: var(--bright); stroke-width: 3.2; }
-    .topology circle { fill: var(--panel); stroke: var(--bright); stroke-width: 2; }
-    .topology text { fill: var(--text); font: 600 15px "Hanken Grotesk", "Aptos", system-ui, sans-serif; text-anchor: middle; dominant-baseline: middle; }
-    .topology .caption { fill: var(--muted); font-size: 12px; font-weight: 400; }
+    .topology-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .topology-controls button { border: 1px solid var(--line); background: transparent; color: var(--text); padding: 7px 11px; font: 600 .78rem "Hanken Grotesk", "Aptos", system-ui, sans-serif; cursor: pointer; }
+    .topology-controls button[aria-pressed="true"] { color: var(--bg); background: var(--bright); border-color: var(--bright); }
+    .topology-controls button:focus-visible, .topology:focus-visible { outline: 2px solid var(--bright); outline-offset: 3px; }
+    .topology { width: 100%; max-width: 620px; display: block; margin: 8px auto 0; touch-action: none; cursor: grab; user-select: none; }
+    .topology:active { cursor: grabbing; }
+    .topology .edge-extra { stroke: var(--quiet); stroke-width: 2; opacity: .68; }
+    .topology .ring-edge { stroke: var(--bright); stroke-width: 3.6; opacity: .96; }
+    .topology .network-edge { stroke-linecap: round; transition: opacity .15s ease; }
+    .topology .network-node { fill: var(--panel); stroke: var(--bright); stroke-width: 2; }
+    .topology .node-label { fill: var(--text); font: 600 14px "Hanken Grotesk", "Aptos", system-ui, sans-serif; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+    .topology .fallback { fill: var(--muted); font: 14px "Hanken Grotesk", "Aptos", system-ui, sans-serif; text-anchor: middle; }
     .topology-line { display: inline-block; width: 20px; border-top: 3px solid var(--bright); }
     .topology-line.extra { border-top-width: 1.5px; border-color: var(--quiet); }
+    .bell-circuit { width: 100%; max-width: 540px; display: block; margin: 12px auto; }
+    .bell-circuit .wire { stroke: var(--muted); stroke-width: 2; }
+    .bell-circuit .gate { fill: var(--panel); stroke: var(--bright); stroke-width: 1.5; }
+    .bell-circuit .gate-label, .bell-circuit .qubit-label { fill: var(--text); font: 600 14px "Hanken Grotesk", "Aptos", system-ui, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .bell-circuit .control { fill: var(--bright); }
+    .bell-circuit .target { fill: none; stroke: var(--bright); stroke-width: 1.7; }
+    .bell-results table { min-width: 620px; }
+    .formula { margin-top: 12px; color: var(--bright); font: 500 1.2rem "Cormorant Garamond", Georgia, serif; }
     .resource-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
     .resource {
       padding: 12px;
@@ -396,27 +410,19 @@
       <div class="two-col">
         <article class="card">
           <h3>Full coupling graph and Q2 mapping</h3>
-          <svg class="topology" viewBox="0 0 570 300" role="img" aria-labelledby="topology-title topology-desc">
-            <title id="topology-title">Processor D coupling graph with the PS-Q2 ring highlighted</title>
-            <desc id="topology-desc">Qubits 0, 1, 2, and 3 form a K4 core. Qubit 4 connects to 0 and 3; qubit 5 connects to 1 and 2. Bold edges show the PS-Q2 ring 4, 0, 2, 5, 1, 3, and back to 4.</desc>
-            <line class="edge-extra" x1="200" y1="65" x2="370" y2="65"></line>
-            <line class="edge-extra" x1="200" y1="65" x2="200" y2="205"></line>
-            <line class="edge-extra" x1="370" y1="65" x2="370" y2="205"></line>
-            <line class="edge-extra" x1="370" y1="205" x2="200" y2="205"></line>
-            <line class="ring-edge" x1="200" y1="65" x2="370" y2="205"></line>
-            <line class="ring-edge" x1="370" y1="65" x2="200" y2="205"></line>
-            <line class="ring-edge" x1="200" y1="65" x2="75" y2="135"></line>
-            <line class="ring-edge" x1="200" y1="205" x2="75" y2="135"></line>
-            <line class="ring-edge" x1="370" y1="65" x2="495" y2="135"></line>
-            <line class="ring-edge" x1="370" y1="205" x2="495" y2="135"></line>
-            <circle cx="200" cy="65" r="24"></circle><text x="200" y="65">0</text>
-            <circle cx="370" cy="65" r="24"></circle><text x="370" y="65">1</text>
-            <circle cx="370" cy="205" r="24"></circle><text x="370" y="205">2</text>
-            <circle cx="200" cy="205" r="24"></circle><text x="200" y="205">3</text>
-            <circle cx="75" cy="135" r="24"></circle><text x="75" y="135">4</text>
-            <circle cx="495" cy="135" r="24"></circle><text x="495" y="135">5</text>
-            <text class="caption" x="285" y="258">Q2 ring: 4 — 0 — 2 — 5 — 1 — 3 — 4</text>
+          <p class="section-note">Drag to rotate · arrow keys also work</p>
+          <svg class="topology" id="processor3d" viewBox="0 0 570 320" role="img" tabindex="0" aria-labelledby="topology-title topology-desc">
+            <title id="topology-title">Rotatable 3D view of Processor D and the PS-Q2 ring</title>
+            <desc id="topology-desc">Shows all ten undirected Processor D links in perspective. The K4 core is qubits 0 through 3; qubit 4 connects to 0 and 3, and qubit 5 connects to 1 and 2. Bright edges mark the PS-Q2 ring 4-0-2-5-1-3-4.</desc>
+            <g id="processor-edges"></g>
+            <g id="processor-nodes"></g>
+            <text class="fallback" x="285" y="160">Processor D graph · PS-Q2 ring highlighted</text>
           </svg>
+          <div class="topology-controls">
+            <button type="button" id="auto-rotate" aria-pressed="false">Auto-rotate</button>
+            <button type="button" id="reset-view">Reset view</button>
+            <span class="section-note">Bright: PS-Q2 ring · muted: other links</span>
+          </div>
           <div class="legend topology-legend" aria-label="Topology legend">
             <span><i class="topology-line"></i>PS-Q2 ring edge</span>
             <span><i class="topology-line extra"></i>Other Processor D link</span>
@@ -475,21 +481,66 @@
       </div>
     </section>
 
-    <section class="section" aria-labelledby="common-tasks-title">
+    <section class="section" aria-labelledby="bell-title">
       <div class="section-head">
-        <h2 id="common-tasks-title">Common benchmark tasks</h2>
+        <h2 id="bell-title">The Bell state: a compact test of entanglement.</h2>
+        <p class="section-note">Task A · official benchmark</p>
+      </div>
+      <p class="lead">A Hadamard gate followed by CX prepares the Bell pair |Φ⁺⟩ = (|00⟩ + |11⟩) / √2. Task A measures XX, YY, and ZZ correlations, then combines them into fidelity. These are seeded QFF2026-v2 simulator results, not hardware measurements.</p>
+      <div class="two-col">
+        <article class="card">
+          <h3>Prepare the Bell pair</h3>
+          <svg class="bell-circuit" viewBox="0 0 480 170" role="img" aria-labelledby="bell-circuit-title bell-circuit-desc">
+            <title id="bell-circuit-title">Bell-pair preparation circuit</title>
+            <desc id="bell-circuit-desc">A Hadamard gate on q0 followed by a controlled-X gate from q0 to q1.</desc>
+            <text class="qubit-label" x="32" y="55">q0</text>
+            <text class="qubit-label" x="32" y="120">q1</text>
+            <line class="wire" x1="58" y1="55" x2="440" y2="55"></line>
+            <line class="wire" x1="58" y1="120" x2="440" y2="120"></line>
+            <rect class="gate" x="105" y="37" width="38" height="36" rx="2"></rect>
+            <text class="gate-label" x="124" y="55">H</text>
+            <line class="wire" x1="245" y1="55" x2="245" y2="120"></line>
+            <circle class="control" cx="245" cy="55" r="7"></circle>
+            <circle class="target" cx="245" cy="120" r="12"></circle>
+            <line class="wire" x1="237" y1="120" x2="253" y2="120"></line>
+            <line class="wire" x1="245" y1="112" x2="245" y2="128"></line>
+            <rect class="gate" x="345" y="37" width="38" height="36" rx="2"></rect>
+            <rect class="gate" x="345" y="102" width="38" height="36" rx="2"></rect>
+            <text class="gate-label" x="364" y="55">M</text>
+            <text class="gate-label" x="364" y="120">M</text>
+          </svg>
+          <p>The CX control is q0 and its target is q1. Ideally, measuring both in Z gives 00 or 11 with equal probability. The official fidelity also checks X- and Y-basis correlations.</p>
+          <div class="callout" style="margin-top:12px"><strong>Entanglement:</strong> the Bell pair is a joint state that cannot be separated into independent states for q0 and q1.</div>
+        </article>
+        <article class="card bell-results">
+          <h3>Official Task A results</h3>
+          <p class="section-note" style="margin:4px 0 12px">8,192 shots in each measurement basis</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Measurement</th><th>Ideal</th><th>QFF2026-v2 noisy</th></tr></thead>
+              <tbody>
+                <tr><td>⟨XX⟩</td><td>1.0000 ± 0.0000</td><td>0.8191 ± 0.0063</td></tr>
+                <tr><td>⟨YY⟩</td><td>−1.0000 ± 0.0000</td><td>−0.8279 ± 0.0062</td></tr>
+                <tr><td>⟨ZZ⟩</td><td>1.0000 ± 0.0000</td><td>0.8735 ± 0.0054</td></tr>
+                <tr><td>Bell fidelity</td><td>1.0000 ± 0.0000</td><td>0.8801 ± 0.0026</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="formula">F = (1 + ⟨XX⟩ − ⟨YY⟩ + ⟨ZZ⟩) / 4</p>
+          <p class="section-note" style="margin-top:8px">The reported uncertainty is the benchmark's standard error. Bell fidelity is calculated from the three correlations; it is not simply P(00) + P(11).</p>
+        </article>
+      </div>
+      <div class="callout"><strong>Noise scope:</strong> Task A includes the official measurement and readout model. The PS-Q2 density-matrix kernel has no measurement step, so readout noise does not enter its kernel calculation.</div>
+    </section>
+
+    <section class="section" aria-labelledby="task-b-title">
+      <div class="section-head">
+        <h2 id="task-b-title">Task B · Processor D QFT-3</h2>
         <p class="section-note">Separate from PS-Q2 classification</p>
       </div>
       <div class="grid">
         <article class="card benchmark-card">
-          <span class="label">Task A · Bell-state fidelity</span>
-          <h3 style="margin-top:8px">Ideal and noisy simulation</h3>
-          <div class="benchmark-value"><span>Ideal</span><strong>1.0000 ± 0.0000</strong></div>
-          <div class="benchmark-value"><span>QFF2026-v2 noisy</span><strong>0.8801 ± 0.0026</strong></div>
-          <p>8,192 shots per XX, YY, and ZZ basis. Fidelity is (1 + XX − YY + ZZ) / 4.</p>
-        </article>
-        <article class="card benchmark-card">
-          <span class="label">Task B · Processor D QFT-3</span>
+          <span class="label">Official QFT-3 benchmark</span>
           <h3 style="margin-top:8px">Routing and noisy fidelity</h3>
           <div class="benchmark-value"><span>Depth before → after transpilation</span><strong>6 → 18</strong></div>
           <div class="benchmark-value"><span>Two-qubit gates · routing SWAPs</span><strong>9 · 0</strong></div>
@@ -500,12 +551,18 @@
     </section>
 
     <section class="section" aria-labelledby="terms-title">
-      <div class="section-head"><h2 id="terms-title">A few terms</h2></div>
+      <div class="section-head"><h2 id="terms-title">Terms used in this run</h2></div>
       <dl class="term-grid">
         <div class="term"><dt>Balanced accuracy</dt><dd>Average recall across the two classes. The official PS-Q2 metric.</dd></div>
         <div class="term"><dt>Cross-validation (CV)</dt><dd>Repeated train/validation splits within the labeled training set. These scores estimate model selection performance, not hidden-test performance.</dd></div>
-        <div class="term"><dt>Ideal / noisy kernel</dt><dd>Pairwise state similarities from exact statevectors or QFF2026-v2 density matrices.</dd></div>
+        <div class="term"><dt>Quantum kernel / QSVM</dt><dd>A quantum circuit computes pairwise sample similarities; a classical SVM fits and predicts from that kernel.</dd></div>
+        <div class="term"><dt>Ideal / noisy kernel</dt><dd>Ideal uses exact statevector overlaps. Noisy uses normalized density-matrix overlaps under QFF2026-v2.</dd></div>
+        <div class="term"><dt>Weak-ZZ ring</dt><dd>The fixed six-qubit feature map used by PS-Q2. Its six data-dependent ZZ interactions follow Processor D's highlighted cycle.</dd></div>
         <div class="term"><dt>RBF-SVM baseline</dt><dd>A classical support vector machine using all 50 standardized input features.</dd></div>
+        <div class="term"><dt>Bell state and entanglement</dt><dd>|Φ⁺⟩ is a two-qubit entangled state. Its XX, YY, and ZZ correlations are combined into the official Task A fidelity.</dd></div>
+        <div class="term"><dt>CX and SWAP</dt><dd>CX is a two-qubit controlled-X gate. A routing SWAP moves qubit states and is commonly decomposed into three CX gates.</dd></div>
+        <div class="term"><dt>QFF2026-v2</dt><dd>The organizer's fixed noise model. Readout noise applies to measured tasks such as Task A; it does not enter the unmeasured PS-Q2 kernel.</dd></div>
+        <div class="term"><dt>Processor D</dt><dd>A configured six-qubit simulated coupling graph. Its topology is transpiled and evaluated with the organizer's noise model.</dd></div>
       </dl>
     </section>
 
@@ -520,5 +577,141 @@
       </nav>
     </footer>
   </main>
+  <script>
+    (() => {
+      const svg = document.getElementById("processor3d");
+      const edgeLayer = document.getElementById("processor-edges");
+      const nodeLayer = document.getElementById("processor-nodes");
+      const autoButton = document.getElementById("auto-rotate");
+      const resetButton = document.getElementById("reset-view");
+      if (!svg || !edgeLayer || !nodeLayer) return;
+
+      const ns = "http://www.w3.org/2000/svg";
+      const nodes = [
+        { id: 0, position: [-1, -0.7, 0] },
+        { id: 1, position: [1, -0.7, 0] },
+        { id: 2, position: [0.85, 0.8, 0] },
+        { id: 3, position: [-0.75, 0.75, 0.95] },
+        { id: 4, position: [-0.8, 0.05, 2.0] },
+        { id: 5, position: [0.9, 0.05, -1.5] }
+      ];
+      const edges = [
+        { a: 0, b: 1 }, { a: 0, b: 3 }, { a: 1, b: 2 }, { a: 2, b: 3 },
+        { a: 0, b: 2, ring: true }, { a: 1, b: 3, ring: true },
+        { a: 0, b: 4, ring: true }, { a: 3, b: 4, ring: true },
+        { a: 1, b: 5, ring: true }, { a: 2, b: 5, ring: true }
+      ];
+      const edgeElements = edges.map(edge => {
+        const line = document.createElementNS(ns, "line");
+        line.setAttribute("class", `network-edge ${edge.ring ? "ring-edge" : "edge-extra"}`);
+        edgeLayer.appendChild(line);
+        return { edge, element: line };
+      });
+      const nodeElements = nodes.map(node => {
+        const group = document.createElementNS(ns, "g");
+        group.setAttribute("aria-label", `Physical qubit ${node.id}`);
+        const circle = document.createElementNS(ns, "circle");
+        circle.setAttribute("class", "network-node");
+        const label = document.createElementNS(ns, "text");
+        label.setAttribute("class", "node-label");
+        label.textContent = String(node.id);
+        group.append(circle, label);
+        nodeLayer.appendChild(group);
+        return { node, group, circle, label };
+      });
+      const fallback = svg.querySelector(".fallback");
+      if (fallback) fallback.style.display = "none";
+
+      const initialYaw = 0.42;
+      const initialPitch = -0.24;
+      let yaw = initialYaw;
+      let pitch = initialPitch;
+      let dragging = null;
+      let autoRotate = false;
+      let frame = 0;
+
+      function project(point) {
+        const [x, y, z] = point;
+        const cosYaw = Math.cos(yaw);
+        const sinYaw = Math.sin(yaw);
+        const rotatedX = x * cosYaw - z * sinYaw;
+        const rotatedZ = x * sinYaw + z * cosYaw;
+        const cosPitch = Math.cos(pitch);
+        const sinPitch = Math.sin(pitch);
+        const rotatedY = y * cosPitch - rotatedZ * sinPitch;
+        const depth = y * sinPitch + rotatedZ * cosPitch;
+        const scale = 96 * (5.5 / (5.5 + depth));
+        return { x: 285 + rotatedX * scale, y: 160 + rotatedY * scale, depth, scale };
+      }
+
+      function render() {
+        const projected = new Map(nodes.map(node => [node.id, project(node.position)]));
+        for (const { edge, element } of edgeElements) {
+          const a = projected.get(edge.a);
+          const b = projected.get(edge.b);
+          element.setAttribute("x1", a.x);
+          element.setAttribute("y1", a.y);
+          element.setAttribute("x2", b.x);
+          element.setAttribute("y2", b.y);
+        }
+        for (const { node, group, circle } of nodeElements) {
+          const point = projected.get(node.id);
+          group.setAttribute("transform", `translate(${point.x} ${point.y})`);
+          circle.setAttribute("r", Math.max(13, Math.min(18, 15 * point.scale / 96)));
+        }
+      }
+
+      function rotateFrame() {
+        if (!autoRotate) return;
+        yaw += 0.006;
+        render();
+        frame = requestAnimationFrame(rotateFrame);
+      }
+
+      function setAutoRotate(enabled) {
+        autoRotate = enabled;
+        autoButton.setAttribute("aria-pressed", String(enabled));
+        if (enabled) {
+          cancelAnimationFrame(frame);
+          frame = requestAnimationFrame(rotateFrame);
+        } else {
+          cancelAnimationFrame(frame);
+        }
+      }
+
+      svg.addEventListener("pointerdown", event => {
+        dragging = { x: event.clientX, y: event.clientY };
+        svg.setPointerCapture(event.pointerId);
+        if (autoRotate) setAutoRotate(false);
+      });
+      svg.addEventListener("pointermove", event => {
+        if (!dragging) return;
+        yaw += (event.clientX - dragging.x) * 0.009;
+        pitch = Math.max(-1.1, Math.min(1.1, pitch + (event.clientY - dragging.y) * 0.009));
+        dragging = { x: event.clientX, y: event.clientY };
+        render();
+      });
+      svg.addEventListener("pointerup", () => { dragging = null; });
+      svg.addEventListener("pointercancel", () => { dragging = null; });
+      svg.addEventListener("keydown", event => {
+        const step = 0.12;
+        if (event.key === "ArrowLeft") yaw -= step;
+        else if (event.key === "ArrowRight") yaw += step;
+        else if (event.key === "ArrowUp") pitch = Math.max(-1.1, pitch - step);
+        else if (event.key === "ArrowDown") pitch = Math.min(1.1, pitch + step);
+        else return;
+        event.preventDefault();
+        render();
+      });
+      autoButton.addEventListener("click", () => setAutoRotate(!autoRotate));
+      resetButton.addEventListener("click", () => {
+        setAutoRotate(false);
+        yaw = initialYaw;
+        pitch = initialPitch;
+        render();
+      });
+      render();
+    })();
+  </script>
 </body>
 </html>
